@@ -2,11 +2,12 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, User, Settings } from "lucide-react";
+import { Home, Dumbbell, User, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITENS = [
   { href: "/", label: "Início", Icon: Home },
+  { href: "/treino", label: "Treino", Icon: Dumbbell },
   { href: "/perfil", label: "Perfil", Icon: User },
   { href: "/configuracoes", label: "Config", Icon: Settings },
 ];
@@ -17,7 +18,7 @@ export function BottomNav() {
   return (
     <nav className="sticky bottom-0 z-10 flex border-t bg-background">
       {ITENS.map(({ href, label, Icon }) => {
-        const ativo = pathname === href;
+        const ativo = href === "/" ? pathname === "/" : pathname.startsWith(href);
         return (
           <Link
             key={href}

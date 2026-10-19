@@ -59,13 +59,28 @@ treino PPL inicial).
 - **shadcn/ui usa `@base-ui/react`** (não Radix): `Select.Value` só mostra o label
   certo se você passar uma função `children` mapeando valor→label (senão mostra o
   valor crú); `Button` com `render={<Link .../>}` precisa de `nativeButton={false}`.
+- **Timer de descanso usa timestamp absoluto** (`Date.now() + segundos*1000` em
+  `sessionStorage`), não um contador que decrementa — sobrevive a throttling de aba
+  em segundo plano. Som (Web Audio), vibração e `Notification` disparam no
+  `setTimeout`; isso não sobrevive a aba realmente encerrada pelo sistema (limite
+  físico de PWA, documentado no plano da Fase 3).
+- **`sincronizar()` (offline) tem uma trava de concorrência** (`lib/offline/sync.ts`):
+  é chamada de 3 lugares (montar o layout, evento `online`, depois de cada
+  série/treino concluído) — sem a trava, duas chamadas simultâneas liam a mesma
+  sessão local sem `idRemoto` e criavam duas linhas remotas pra ela (bug real,
+  encontrado testando). Só uma rodada roda por vez.
+- **Dexie: todo campo usado em `.where(...)` precisa estar na lista de índices** do
+  `db.version(n).stores({...})` — esquecer isso (aconteceu com `treinoDiaId`) dá um
+  `SchemaError` silencioso em runtime, não em typecheck. Mudar o schema do Dexie
+  exige subir a versão (`db.version(n+1).stores({...})`), nunca editar a versão já
+  publicada.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
 0. ✅ Plano (schema, Edge Function, JSON da IA)
 1. ✅ Setup: Next.js PWA, Supabase local, migrations, seed, tipos, este arquivo
 2. ✅ Login e perfil/anamnese
-3. 🚧 Treino: visualização, edição manual, execução guiada, cronômetros, offline
+3. ✅ Treino: visualização, edição manual, execução guiada, cronômetros, offline
 4. IA: configurações, Edge Function, Claude + Gemini, prévia com diff
 5. Evolução: medidas, fotos, gráficos, calendário
 6. Deploy (Vercel + Supabase cloud) + instalação no celular
@@ -76,9 +91,11 @@ treino PPL inicial).
   free-exercise-db); tradução/ajuste para pt-BR é curadoria manual, incremental.
 - `youtube_url` e `imagem_url` dos exercícios base estão `null` — curadoria manual
   (free-exercise-db não tem vídeo; as imagens dele podem ser copiadas para o Storage
-  depois, não hotlink).
-- `types/database.types.ts` é um placeholder até rodar `npm run db:types` com o
-  Supabase local no ar.
+  depois, não hotlink). Por isso o botão "Como executar" aparece desabilitado
+  ("Vídeo não cadastrado") pra praticamente todo exercício por agora.
+- Edição manual do treino (Fase 3) cobre só o nível de exercício (trocar, séries,
+  reps, carga, descanso, ordem, método) — criar/remover dias inteiros ou arquivar o
+  ciclo fica para quando a geração por IA (Fase 4) ou uma ação própria existir.
 
 ## Regras de trabalho
 

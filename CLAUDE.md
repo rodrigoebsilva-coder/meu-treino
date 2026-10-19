@@ -47,13 +47,25 @@ treino PPL inicial).
   manter as policies simples e os índices eficientes.
 - **PWA com Turbopack**: service worker é uma *route* (`app/serwist/[path]/route.ts`),
   não um arquivo estático em `public/`. Ver `app/sw.ts` e `next.config.ts`.
+  `SerwistProvider` precisa de `disable={NODE_ENV === "development"}` — sem isso o SW
+  intercepta os assets do Turbopack/HMR e quebra a navegação em `next dev`.
+- **Sem `cacheComponents`/`partialPrefetching`**: toda rota em `(app)` e `(auth)`
+  depende de `cookies()` (sessão), então não existe shell estático que valha gerar.
+- **Login só e-mail/senha** (não implementei magic link): mais simples pra single-user
+  e pro seed de dev local; pode virar opção extra depois sem mudar o schema.
+- **Anamnese nunca é sobrescrita**: editar sempre insere uma nova linha com
+  `versao = max(versao)+1` (ver `app/(app)/perfil/actions.ts`); a policy de
+  `update` na tabela existe só pra correção pontual, o app nunca usa.
+- **shadcn/ui usa `@base-ui/react`** (não Radix): `Select.Value` só mostra o label
+  certo se você passar uma função `children` mapeando valor→label (senão mostra o
+  valor crú); `Button` com `render={<Link .../>}` precisa de `nativeButton={false}`.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
 0. ✅ Plano (schema, Edge Function, JSON da IA)
-1. 🚧 Setup: Next.js PWA, Supabase local, migrations, seed, tipos, este arquivo
-2. Login e perfil/anamnese
-3. Treino: visualização, edição manual, execução guiada, cronômetros, offline
+1. ✅ Setup: Next.js PWA, Supabase local, migrations, seed, tipos, este arquivo
+2. ✅ Login e perfil/anamnese
+3. 🚧 Treino: visualização, edição manual, execução guiada, cronômetros, offline
 4. IA: configurações, Edge Function, Claude + Gemini, prévia com diff
 5. Evolução: medidas, fotos, gráficos, calendário
 6. Deploy (Vercel + Supabase cloud) + instalação no celular

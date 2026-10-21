@@ -31,7 +31,7 @@ export default async function PerfilPage() {
 
   return (
     <main className="flex flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Perfil</h1>
+      <h1 className="text-2xl font-semibold">Perfil 👤</h1>
 
       <p className="text-xs text-muted-foreground">
         Os planos aqui são sugestões de IA, não supervisão profissional.{" "}

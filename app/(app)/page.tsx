@@ -14,6 +14,13 @@ function formatarDuracao(segundos: number) {
   return `${horas}h${String(minutos).padStart(2, "0")}`;
 }
 
+function saudacao(hora: number) {
+  if (hora < 5) return "Boa noite";
+  if (hora < 12) return "Bom dia";
+  if (hora < 18) return "Boa tarde";
+  return "Boa noite";
+}
+
 export default async function HomePage() {
   const supabase = await createClient();
 
@@ -34,7 +41,7 @@ export default async function HomePage() {
 
   return (
     <main className="flex flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Hoje</h1>
+      <h1 className="font-heading text-2xl font-semibold">{saudacao(new Date().getHours())} 👋</h1>
 
       {anamnese ? (
         <p className="text-muted-foreground">
@@ -52,7 +59,7 @@ export default async function HomePage() {
       {treinoAtivo && proximoDia ? (
         <Card>
           <CardHeader>
-            <CardTitle>Treino de hoje</CardTitle>
+            <CardTitle>Treino de hoje 💪</CardTitle>
           </CardHeader>
           <CardContent className="flex items-center justify-between gap-4">
             <div>
@@ -74,7 +81,7 @@ export default async function HomePage() {
       {depoisDeHoje.length > 0 ? (
         <Card>
           <CardHeader>
-            <CardTitle>Próximos treinos</CardTitle>
+            <CardTitle>Próximos treinos 📅</CardTitle>
           </CardHeader>
           <CardContent>
             <p className="text-sm text-muted-foreground">{depoisDeHoje.map((d) => d.nome).join(" · ")}</p>
@@ -85,7 +92,7 @@ export default async function HomePage() {
       {mesociclo ? (
         <Card>
           <CardHeader>
-            <CardTitle>Mesociclo</CardTitle>
+            <CardTitle>Mesociclo 🎯</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col gap-2">
             {mesociclo.fase ? (
@@ -123,7 +130,7 @@ export default async function HomePage() {
         <Card>
           <CardContent className="flex flex-col gap-1 py-4">
             <span className="text-sm text-muted-foreground">Treinos essa semana</span>
-            <span className="text-2xl font-semibold">
+            <span className="font-heading text-3xl font-semibold">
               {resumoSemana.treinosFeitos}
               {anamnese ? <span className="text-base text-muted-foreground">/{anamnese.dias_disponiveis}</span> : null}
             </span>
@@ -132,20 +139,20 @@ export default async function HomePage() {
         <Card>
           <CardContent className="flex flex-col gap-1 py-4">
             <span className="text-sm text-muted-foreground">Séries essa semana</span>
-            <span className="text-2xl font-semibold">{resumoSemana.seriesFeitas}</span>
+            <span className="font-heading text-3xl font-semibold">{resumoSemana.seriesFeitas}</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col gap-1 py-4">
             <span className="text-sm text-muted-foreground">Tempo treinado</span>
-            <span className="text-2xl font-semibold">{formatarDuracao(resumoSemana.duracaoTotalSegundos)}</span>
+            <span className="font-heading text-3xl font-semibold">{formatarDuracao(resumoSemana.duracaoTotalSegundos)}</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col gap-1 py-4">
             <span className="text-sm text-muted-foreground">Streak</span>
-            <span className="flex items-center gap-1 text-2xl font-semibold">
-              <Flame className="size-5 text-primary" /> {streak}
+            <span className="flex items-center gap-1 font-heading text-3xl font-semibold">
+              <Flame className="size-6 fill-orange-500 text-orange-500" /> {streak}
             </span>
           </CardContent>
         </Card>
@@ -154,7 +161,7 @@ export default async function HomePage() {
       {resumoSemana.energiaMedia !== null || resumoSemana.sonoMedia !== null ? (
         <Card>
           <CardHeader>
-            <CardTitle>Check-in médio da semana</CardTitle>
+            <CardTitle>Check-in médio da semana 📝</CardTitle>
           </CardHeader>
           <CardContent className="flex gap-6 text-sm">
             {resumoSemana.energiaMedia !== null ? (

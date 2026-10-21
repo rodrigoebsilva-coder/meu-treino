@@ -10,7 +10,7 @@ export default async function ConfiguracoesIaPage() {
 
   return (
     <main className="flex flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Configurações de IA</h1>
+      <h1 className="text-2xl font-semibold">Configurações de IA 🤖</h1>
       <p className="text-sm text-muted-foreground">
         A chave fica guardada criptografada no Supabase Vault — nunca é enviada de
         volta pro navegador depois de salva.

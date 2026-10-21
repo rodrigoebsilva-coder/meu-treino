@@ -28,7 +28,7 @@ export default async function GerarIaPage({
   if (!config?.modelo_padrao) {
     return (
       <main className="flex flex-col gap-4 p-6">
-        <h1 className="text-2xl font-semibold">Gerar treino com IA</h1>
+        <h1 className="text-2xl font-semibold">Gerar treino com IA 🤖</h1>
         <p className="text-muted-foreground">
           Configure um provedor e uma chave de API antes de gerar um treino.
         </p>
@@ -39,7 +39,7 @@ export default async function GerarIaPage({
 
   return (
     <main className="flex flex-col gap-4 p-6">
-      <h1 className="text-2xl font-semibold">Gerar treino com IA</h1>
+      <h1 className="text-2xl font-semibold">Gerar treino com IA 🤖</h1>
       <GerarPageClient
         provedorPadrao={config.provedor_padrao as ProvedorIA}
         modeloPadrao={config.modelo_padrao}

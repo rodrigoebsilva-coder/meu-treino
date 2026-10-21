@@ -25,10 +25,20 @@ Labs (empresa do usuário) — não do prompt original. Tudo em `app/globals.css
   `#1D4ED8`), secundários violeta `#7C5CFF` e ciano `#0E9AAE` — usados nos
   `--chart-*`. Modo escuro é extrapolado da mesma paleta (o doc da SolIA não
   especifica um dark theme completo).
-- **Sem sombra, sem gradiente, nenhuma exceção**: `Card`/`Dialog`/`Select`/`Sheet`
-  usam `border border-border` no lugar de `shadow-*`/`ring-*`. Qualquer componente
-  shadcn novo que adicionar via `npx shadcn add` provavelmente vem com `shadow-*`
-  por padrão — tirar na hora.
+- **Sombra leve é permitida, de propósito** (revisto out/2026, pedido explícito do
+  usuário pra dar "cara de app de academia"): `Card`/`Dialog`/`Sheet`/`Select` usam
+  `shadow-sm`/`shadow-md`/`shadow-lg` + `border border-border` (as duas coisas juntas,
+  não uma ou outra) e cantos mais arredondados (`rounded-2xl` em vez de `rounded-xl`
+  nos cards/modais). O botão primário (`variant="default"`) tem uma sombra colorida
+  sutil (`shadow-primary/30`) pra parecer "levantado". **Ainda sem gradiente** — isso
+  continua valendo. Qualquer componente shadcn novo que adicionar via
+  `npx shadcn add` provavelmente já vem com `shadow-*` por padrão agora — então, ao
+  contrário de antes, **não precisa tirar** na hora, só confirmar que combina com o
+  resto (sombra discreta, não dramática).
+- **Emoji nos títulos de página é de propósito**, parte do mesmo pedido de "cara de
+  app de academia" (💪 Treino, 📈 Evolução, 🎯 Mesociclo, 🔥 streak em laranja — a
+  única cor quente fora da paleta azul/violeta/ciano, reservada só pro streak).
+  Páginas sérias (aviso legal) ficam sem emoji de propósito.
 - **Botões são pill** (`rounded-full`, não `rounded-lg`) — mudança no
   `buttonVariants` base de `components/ui/button.tsx`, não só uma classe num botão
   específico.

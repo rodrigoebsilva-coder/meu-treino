@@ -18,7 +18,7 @@ export default async function FotosPage() {
 
   return (
     <main className="flex flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Fotos de progresso</h1>
+      <h1 className="text-2xl font-semibold">Fotos de progresso 📸</h1>
       <UploadFoto />
       <FotosGaleria fotos={fotosComUrl} />
     </main>

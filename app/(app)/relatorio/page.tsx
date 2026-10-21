@@ -24,7 +24,7 @@ export default async function RelatorioPage() {
     <main className="flex flex-col gap-6 p-6 print:p-0">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold">Relatório de treino</h1>
+          <h1 className="text-2xl font-semibold">Relatório de treino 📄</h1>
           <p className="text-sm text-muted-foreground">
             {formatarData(dados.periodoInicio)} – {formatarData(dados.periodoFim)}
             {dados.nomeCiclo ? ` · ${dados.nomeCiclo}` : ""}

@@ -12,7 +12,7 @@ export default async function MedidasPage() {
 
   return (
     <main className="flex flex-col gap-6 p-6">
-      <h1 className="text-2xl font-semibold">Medidas</h1>
+      <h1 className="text-2xl font-semibold">Medidas 📏</h1>
 
       <Card>
         <CardHeader>

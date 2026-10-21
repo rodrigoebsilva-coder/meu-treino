@@ -1,4 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { inicioDaSemana } from "@/lib/semana";
 
 export interface PontoPeso {
   data: string;
@@ -14,14 +15,6 @@ export async function buscarPesoHistorico(supabase: SupabaseClient): Promise<Pon
     .limit(180);
 
   return (data ?? []).map((m) => ({ data: m.registrado_em, peso: Number(m.peso_kg) }));
-}
-
-function inicioDaSemana(data: Date): string {
-  const d = new Date(data);
-  const diaSemana = d.getDay();
-  d.setDate(d.getDate() - diaSemana);
-  d.setHours(0, 0, 0, 0);
-  return d.toISOString().slice(0, 10);
 }
 
 export interface PontoSemanal {

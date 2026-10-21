@@ -17,7 +17,7 @@ export function BottomNav() {
   const pathname = usePathname();
 
   return (
-    <nav className="sticky bottom-0 z-10 flex border-t bg-background">
+    <nav className="sticky bottom-0 z-10 flex border-t bg-background print:hidden">
       {ITENS.map(({ href, label, Icon }) => {
         const ativo = href === "/" ? pathname === "/" : pathname.startsWith(href);
         return (

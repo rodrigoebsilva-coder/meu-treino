@@ -204,6 +204,16 @@ treino PPL inicial).
   pra perda, ~0,5%/semana pra ganho — teto biológico menor). Até 1,5x o ritmo seguro
   ainda conta como realista. "Peso atual" é a medida mais recente em `medidas`, com
   fallback pro `peso_inicial_kg` da anamnese se não houver nenhuma medida registrada.
+- **"Próximo dia" não é agenda por dia da semana** — é só o dia seguinte, na ordem do
+  ciclo (`treino_dias.ordem`), ao último treino finalizado (`buscarProximoDia` em
+  `lib/dashboard/dados.ts`). Sem nenhum treino finalizado ainda, sugere o primeiro dia.
+  O usuário treina quando pode, dentro dos dias disponíveis da anamnese — não força
+  "treino de segunda" vs. "treino de terça".
+- **Relatório exportável (`/relatorio`) é HTML com `window.print()`**, não uma lib de
+  PDF nova — período é desde o início do ciclo ativo (`treinos.criado_em`) até hoje
+  (sem ciclo ativo, últimos 90 dias), pra sempre refletir o bloco de treino em
+  andamento em vez de uma janela fixa arbitrária. `print:hidden` no `BottomNav` e no
+  botão "Exportar PDF" esconde a navegação do app na hora de imprimir/exportar.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
@@ -224,7 +234,7 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
    dica de alternativa em casa por exercício
 8. ✅ Check-in completo: energia/sono/dor/notas no check-in, checagem de
    realismo da meta
-9. ⬜ Dashboard "Hoje": progresso semanal + relatório exportável (PDF via print)
+9. ✅ Dashboard "Hoje": progresso semanal + relatório exportável (PDF via print)
 10. ⬜ Ajustes: exportar/importar dados, apagar todos os dados, aviso legal/médico
 11. ⬜ Mesociclo: periodização de 12 semanas, calendário prospectivo, regeneração
     automática do plano pela IA ao fim do ciclo (mais estrutural, fica por último)

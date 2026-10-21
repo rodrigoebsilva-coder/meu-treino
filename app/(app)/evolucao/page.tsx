@@ -35,6 +35,7 @@ export default async function EvolucaoPage() {
         <div className="flex gap-2">
           <Button variant="outline" render={<Link href="/evolucao/medidas">Medidas</Link>} nativeButton={false} />
           <Button variant="outline" render={<Link href="/evolucao/fotos">Fotos</Link>} nativeButton={false} />
+          <Button variant="outline" render={<Link href="/relatorio">Relatório</Link>} nativeButton={false} />
         </div>
       </div>
 

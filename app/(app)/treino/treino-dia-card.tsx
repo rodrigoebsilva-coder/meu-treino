@@ -9,6 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import type { TreinoDiaCompleto, TreinoExercicioComDados, ExercicioResumo } from "@/lib/treino/types";
 import { removerExercicio, reordenarExercicio } from "./actions";
 import { ExercicioEditSheet } from "./exercicio-edit-sheet";
+import { ExercicioVideoButton } from "./exercicio-video-button";
 
 export function TreinoDiaCard({
   dia,
@@ -72,6 +73,11 @@ export function TreinoDiaCard({
               </span>
             </div>
             <div className="flex items-center gap-1">
+              <ExercicioVideoButton
+                nome={ex.exercicio?.nome ?? ex.nome_exercicio_sugerido ?? ""}
+                youtubeUrl={ex.exercicio?.youtube_url ?? null}
+                compact
+              />
               <Button
                 variant="ghost"
                 size="icon-sm"

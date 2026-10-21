@@ -338,10 +338,14 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
 
 - Nomes dos 876 exercícios do seed estão em inglês (vêm direto do
   free-exercise-db); tradução/ajuste para pt-BR é curadoria manual, incremental.
-- `youtube_url` e `imagem_url` dos exercícios base estão `null` — curadoria manual
-  (free-exercise-db não tem vídeo; as imagens dele podem ser copiadas para o Storage
-  depois, não hotlink). Por isso o botão "Como executar" aparece desabilitado
-  ("Vídeo não cadastrado") pra praticamente todo exercício por agora.
+- `imagem_url` dos exercícios base está `null` — curadoria manual (as imagens do
+  free-exercise-db podem ser copiadas pro Storage depois, não hotlink).
+  `youtube_url` também está `null` pra quase todo exercício, mas não bloqueia mais o
+  botão de vídeo: `ExercicioVideoButton` (`app/(app)/treino/exercicio-video-button.tsx`,
+  usado em `treino-dia-card.tsx` e na execução guiada) abre o vídeo embutido quando
+  `youtube_url` existe, e senão vira um link pra uma busca no YouTube pelo nome do
+  exercício (`lib/treino/types.ts`, `youtubeBuscaUrl`) — cobre todo mundo sem precisar
+  de curadoria manual.
 - Edição manual do treino (Fase 3) cobre só o nível de exercício (trocar, séries,
   reps, carga, descanso, ordem, método) — criar/remover dias inteiros ou arquivar o
   ciclo fica para quando a geração por IA (Fase 4) ou uma ação própria existir.

@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Home, Play } from "lucide-react";
+import { Home } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { db, type SerieLocal } from "@/lib/offline/db";
 import { createClient } from "@/lib/supabase/client";
 import { sincronizar } from "@/lib/offline/sync";
-import { extrairYoutubeId, type TreinoDiaCompleto } from "@/lib/treino/types";
+import { type TreinoDiaCompleto } from "@/lib/treino/types";
 import { useRestTimer } from "./use-rest-timer";
 import { RestTimerOverlay } from "./rest-timer-overlay";
 import { CheckinDialog, type CheckinValores } from "./checkin-dialog";
+import { ExercicioVideoButton } from "../../exercicio-video-button";
 
 type Sugestao = { cargaRealKg: number | null; repeticoesReal: number | null };
 type ValoresSerie = { carga: string; reps: string; rpe: string };
@@ -32,7 +32,6 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
   const [valores, setValores] = useState<Record<string, ValoresSerie>>({});
   const [finalizada, setFinalizada] = useState(false);
   const [elapsed, setElapsed] = useState(0);
-  const [videoAberto, setVideoAberto] = useState<string | null>(null);
   const [dicaCasaAberta, setDicaCasaAberta] = useState<string | null>(null);
   const [checkinPendente, setCheckinPendente] = useState(false);
   const descanso = useRestTimer();
@@ -187,11 +186,6 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
   const minutos = String(Math.floor(elapsed / 60)).padStart(2, "0");
   const segundos = String(elapsed % 60).padStart(2, "0");
 
-  const exercicioComVideo = useMemo(
-    () => dia?.treino_exercicios.find((e) => e.id === videoAberto) ?? null,
-    [dia, videoAberto]
-  );
-
   if (dia === undefined) {
     return <p className="p-6 text-muted-foreground">Carregando...</p>;
   }
@@ -238,19 +232,14 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
       </div>
 
       {dia.treino_exercicios.map((ex) => {
-        const youtubeId = extrairYoutubeId(ex.exercicio?.youtube_url ?? null);
         return (
           <Card key={ex.id}>
             <CardHeader className="flex flex-row items-center justify-between gap-2">
               <CardTitle className="text-base">{ex.exercicio?.nome ?? ex.nome_exercicio_sugerido}</CardTitle>
-              <Button
-                variant="outline"
-                size="sm"
-                disabled={!youtubeId}
-                onClick={() => setVideoAberto(ex.id)}
-              >
-                <Play /> {youtubeId ? "Como executar" : "Vídeo não cadastrado"}
-              </Button>
+              <ExercicioVideoButton
+                nome={ex.exercicio?.nome ?? ex.nome_exercicio_sugerido ?? ""}
+                youtubeUrl={ex.exercicio?.youtube_url ?? null}
+              />
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
               {ex.exercicio?.dica_casa ? (
@@ -331,23 +320,6 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
           onPular={descanso.cancelar}
         />
       ) : null}
-
-      <Dialog open={!!videoAberto} onOpenChange={(aberto) => !aberto && setVideoAberto(null)}>
-        <DialogContent className="sm:max-w-lg">
-          <DialogHeader>
-            <DialogTitle>{exercicioComVideo?.exercicio?.nome}</DialogTitle>
-          </DialogHeader>
-          {exercicioComVideo ? (
-            <iframe
-              className="aspect-video w-full rounded-md"
-              src={`https://www.youtube.com/embed/${extrairYoutubeId(exercicioComVideo.exercicio?.youtube_url ?? null)}`}
-              title="Como executar"
-              allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-            />
-          ) : null}
-        </DialogContent>
-      </Dialog>
     </main>
   );
 }

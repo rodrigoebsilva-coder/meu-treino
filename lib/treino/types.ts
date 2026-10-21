@@ -33,3 +33,10 @@ export function extrairYoutubeId(url: string | null): string | null {
   const match = url.match(/(?:v=|\.be\/|embed\/)([a-zA-Z0-9_-]{11})/);
   return match?.[1] ?? null;
 }
+
+// Sem vídeo curado (youtube_url), busca no YouTube pelo nome do exercício —
+// cobre os 876 exercícios do seed sem precisar de curadoria manual.
+export function youtubeBuscaUrl(nomeExercicio: string): string {
+  const query = `${nomeExercicio} how to exercise`;
+  return `https://www.youtube.com/results?search_query=${encodeURIComponent(query)}`;
+}

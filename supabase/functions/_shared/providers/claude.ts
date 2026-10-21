@@ -32,7 +32,13 @@ export async function gerarComClaude(
       system: systemPrompt,
       messages: [{ role: "user", content: userPrompt }],
       tools: [TREINO_TOOL],
-      tool_choice: { type: "tool", name: "retornar_treino" },
+      // Modelos mais novos (ex.: Sonnet 5.5) rejeitam tool_choice forçado
+      // ("tool"/"any") com 400 — não é suportado quando o modelo pode usar
+      // extended thinking. "auto" funciona em todos os modelos; como só
+      // existe essa tool e o system prompt já instrui a sempre usá-la, o
+      // modelo chama de qualquer forma na prática (bug real, encontrado
+      // testando em produção com claude-sonnet-5-5).
+      tool_choice: { type: "auto" },
     }),
   });
 

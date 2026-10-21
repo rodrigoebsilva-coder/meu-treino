@@ -12,7 +12,7 @@ export default async function LoginPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-1 items-center justify-center p-6">
+    <main className="flex min-h-screen flex-1 flex-col items-center justify-center gap-4 p-6">
       <Card className="w-full max-w-sm">
         <CardHeader>
           <CardTitle>Meu Treino</CardTitle>
@@ -21,6 +21,7 @@ export default async function LoginPage() {
           <LoginForm />
         </CardContent>
       </Card>
+      <p className="text-xs text-muted-foreground">Criado por SolIA Labs</p>
     </main>
   );
 }

@@ -46,7 +46,13 @@ Labs (empresa do usuário) — não do prompt original. Tudo em `app/globals.css
   corpo usa a stack `system-ui`; mono (`font-mono`) é só a stack do sistema
   (`ui-monospace, Menlo, monospace`), sem Google Font — a SolIA não pede uma fonte
   mono customizada.
-- Ícones do PWA (`public/icons/*.png`) e `theme_color` usam o azul `#3B82F6`.
+- Ícones do PWA (`public/icons/*.png`) e `theme_color` usam o azul `#3B82F6`. O
+  ícone é o dumbbell do lucide (mesmo da bottom nav) em branco sobre o azul —
+  gerado a partir de `public/icons/icon-source.svg` via `sharp` (script inline,
+  não precisa de ferramenta externa pra reexportar nos tamanhos certos se o
+  logo mudar: 192/512/180 + `app/icon.png` do favicon, 32x32). `app/favicon.ico`
+  (o ícone genérico do Next.js) foi removido — `app/icon.png` é a convenção de
+  arquivo especial do App Router que substitui ele.
 
 ## Como rodar local
 

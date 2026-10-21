@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { sair } from "../actions";
@@ -12,9 +13,7 @@ export default function ConfiguracoesPage() {
         <ThemeToggle />
       </div>
 
-      <p className="text-muted-foreground">
-        Configurações de IA (Claude/Gemini) chegam na Fase 4.
-      </p>
+      <Button variant="outline" render={<Link href="/configuracoes/ia">IA (Claude/Gemini)</Link>} nativeButton={false} className="w-fit" />
 
       <form action={sair}>
         <Button type="submit" variant="outline">

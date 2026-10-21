@@ -74,6 +74,38 @@ treino PPL inicial).
   `SchemaError` silencioso em runtime, não em typecheck. Mudar o schema do Dexie
   exige subir a versão (`db.version(n+1).stores({...})`), nunca editar a versão já
   publicada.
+- **Schema da IA (`TreinoGeradoSchema`) mora em `supabase/functions/_shared/schemas.ts`**,
+  não em `lib/ai/`. A Edge Function `gerar-treino` (Deno) e o Next.js (Node) precisam
+  do mesmo Zod schema; Deno resolve `"zod"` via `deno.json` (`npm:zod@^4`), Next
+  resolve via `node_modules` — então o arquivo funciona nos dois runtimes sem
+  nenhuma flag especial, **desde que não tenha import relativo pra outro arquivo**
+  (Deno exige extensão `.ts` em import relativo; evitamos a dor de cabeça mantendo
+  esse arquivo autocontido). `lib/ai/schemas.ts` é só um reexport +
+  labels de UI. `tsconfig.json` exclui `supabase/functions/**` do typecheck do
+  Next (código Deno, globals diferentes) — isso não impede o reexport de resolver,
+  porque `exclude` só afeta o glob inicial, não imports transitivos.
+- **Edge Functions usam um cliente Supabase escopado ao JWT de quem chamou**
+  (`supabase/functions/_shared/user-client.ts`, repassando o header `Authorization`
+  manualmente) — não o `@supabase/server`/`withSupabase` que o `supabase functions new`
+  gera por padrão (esse vem configurado pra autenticação por apiKey
+  publishable/secret, não pelo usuário logado). `verify_jwt = true` setado à mão em
+  `config.toml` pros dois (`gerar-treino`, `listar-modelos`) — o scaffold cria com
+  `false`.
+- **`vault_set_ai_key` precisa usar `vault.update_secret` se já existe um secret_id**,
+  nunca chamar `vault.create_secret` de novo com o mesmo nome — `vault.secrets.name`
+  é único, e sempre usamos `<provedor>_key_<user_id>` como nome. Trocar a chave de
+  um provedor já configurado dava erro de constraint única até essa correção (bug
+  real, encontrado testando).
+- **`aprovarTreino` não é atômico** (várias chamadas sequenciais ao Supabase, sem
+  transação): se falhar no meio, o treino antigo já foi arquivado e o novo fica
+  parcialmente criado. Risco aceito pra um app de usuário único — se acontecer,
+  corrigir à mão via SQL local (apagar o treino quebrado, voltar o anterior pra
+  `ativo`) é mais simples que construir uma RPC transacional pra isso agora.
+- **Schema do Gemini (`responseSchema`) é um adaptador manual**
+  (`_shared/providers/gemini-schema-adapter.ts`): converte o JSON Schema do zod pro
+  subconjunto OpenAPI que a Gemini aceita (tipos em MAIÚSCULO, `nullable` como
+  booleano em vez de union de tipos). Usar `z.toJSONSchema(schema, { reused: "inline" })`
+  nos dois providers (Claude e Gemini) pra não lidar com `$ref`/`$defs`.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
@@ -81,7 +113,7 @@ treino PPL inicial).
 1. ✅ Setup: Next.js PWA, Supabase local, migrations, seed, tipos, este arquivo
 2. ✅ Login e perfil/anamnese
 3. ✅ Treino: visualização, edição manual, execução guiada, cronômetros, offline
-4. IA: configurações, Edge Function, Claude + Gemini, prévia com diff
+4. ✅ IA: configurações, Edge Function, Claude + Gemini, prévia com diff
 5. Evolução: medidas, fotos, gráficos, calendário
 6. Deploy (Vercel + Supabase cloud) + instalação no celular
 
@@ -96,6 +128,11 @@ treino PPL inicial).
 - Edição manual do treino (Fase 3) cobre só o nível de exercício (trocar, séries,
   reps, carga, descanso, ordem, método) — criar/remover dias inteiros ou arquivar o
   ciclo fica para quando a geração por IA (Fase 4) ou uma ação própria existir.
+- Se a Edge Function falhar com erro de certificado TLS chamando a Anthropic/Gemini
+  localmente (`invalid peer certificate: UnknownIssuer`), é o Kaspersky (ou outro
+  antivírus com inspeção de HTTPS) interceptando o tráfego do Docker — nessa máquina
+  foi transitório (sumiu depois de reiniciar o container do edge-runtime), mas se
+  persistir não é bug do código.
 
 ## Regras de trabalho
 

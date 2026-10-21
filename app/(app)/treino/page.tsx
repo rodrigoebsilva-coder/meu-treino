@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import type { TreinoCompleto, ExercicioResumo } from "@/lib/treino/types";
 import { TreinoView } from "./treino-view";
@@ -25,10 +27,12 @@ export default async function TreinoPage() {
     return (
       <main className="flex flex-col gap-4 p-6">
         <h1 className="text-2xl font-semibold">Treino</h1>
-        <p className="text-muted-foreground">
-          Você ainda não tem um treino ativo. Isso chega na Fase 4 (geração por IA) ou
-          pode ser criado manualmente depois.
-        </p>
+        <p className="text-muted-foreground">Você ainda não tem um treino ativo.</p>
+        <Button
+          render={<Link href="/treino/gerar-ia">Gerar treino com IA</Link>}
+          nativeButton={false}
+          className="w-fit"
+        />
       </main>
     );
   }

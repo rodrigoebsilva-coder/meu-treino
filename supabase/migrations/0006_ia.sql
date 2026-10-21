@@ -31,18 +31,29 @@ as $$
 declare
   v_secret_id uuid;
 begin
-  v_secret_id := vault.create_secret(p_chave, p_provedor::text || '_key_' || auth.uid()::text);
-
   insert into public.config_ia (user_id, modelo_padrao, claude_key_secret_id, gemini_key_secret_id)
   values (auth.uid(), '', null, null)
   on conflict (user_id) do nothing;
 
-  if p_provedor = 'claude' then
-    update public.config_ia set claude_key_secret_id = v_secret_id, atualizado_em = now()
-      where user_id = auth.uid();
+  select (case when p_provedor = 'claude' then claude_key_secret_id else gemini_key_secret_id end)
+    into v_secret_id
+    from public.config_ia
+    where user_id = auth.uid();
+
+  -- Trocar a chave atualiza o segredo existente em vez de criar um novo:
+  -- vault.create_secret exige um "name" único, e sempre usamos o mesmo
+  -- nome (<provedor>_key_<user_id>) — criar de novo colidiria.
+  if v_secret_id is not null then
+    perform vault.update_secret(v_secret_id, p_chave);
   else
-    update public.config_ia set gemini_key_secret_id = v_secret_id, atualizado_em = now()
-      where user_id = auth.uid();
+    v_secret_id := vault.create_secret(p_chave, p_provedor::text || '_key_' || auth.uid()::text);
+    if p_provedor = 'claude' then
+      update public.config_ia set claude_key_secret_id = v_secret_id, atualizado_em = now()
+        where user_id = auth.uid();
+    else
+      update public.config_ia set gemini_key_secret_id = v_secret_id, atualizado_em = now()
+        where user_id = auth.uid();
+    end if;
   end if;
 end;
 $$;

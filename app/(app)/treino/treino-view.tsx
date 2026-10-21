@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import { db } from "@/lib/offline/db";
 import type { TreinoCompleto, ExercicioResumo } from "@/lib/treino/types";
 import { TreinoDiaCard } from "./treino-dia-card";
@@ -32,6 +33,12 @@ export function TreinoView({
           Histórico
         </Link>
       </div>
+
+      <Button
+        render={<Link href="/treino/gerar-ia">Gerar novo treino com IA</Link>}
+        nativeButton={false}
+        className="w-fit"
+      />
 
       <div className="flex flex-col gap-4">
         {treino.treino_dias.map((dia) => (

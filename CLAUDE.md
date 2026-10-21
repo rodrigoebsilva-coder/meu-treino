@@ -31,6 +31,27 @@ Login de desenvolvimento (criado pelo seed, só existe na stack local):
 `supabase/seeds/*.sql` (exercícios do free-exercise-db + esse usuário + anamnese +
 treino PPL inicial).
 
+## Produção
+
+- App: https://meu-treino-drab-delta.vercel.app (Vercel, projeto
+  `rodrigoebsilva-coders-projects/meu-treino`)
+- Supabase cloud: projeto `bmijwtwtnhzyrdusnmak` (região us-west-2)
+- `supabase/seeds/*.sql` **nunca** rodam em cloud (`db push` só aplica migrations) —
+  só a base de exercícios (`01_exercicios.sql`) foi enviada manualmente via
+  `supabase db query --linked -f supabase/seeds/01_exercicios.sql`. Os seeds
+  `02_usuario_dev.sql`/`03_treino_inicial.sql` são só pra stack local — **nunca**
+  rodar em produção (criam um usuário com senha fraca conhecida).
+- Usuário de produção criado à mão pelo dashboard (Authentication → Users), com
+  "Allow new users to sign up" desligado — o app não tem tela de cadastro público
+  de propósito (single-user).
+- Deploy é via CLI (`npx vercel --prod`), não auto-deploy por push: o `vercel link`
+  não conseguiu conectar o repo GitHub automaticamente (precisa autorizar o GitHub
+  App do Vercel no dashboard primeiro, em Project Settings → Git). Rodar
+  `npx vercel git connect` depois de autorizar, se quiser deploy automático.
+- Pra reaplicar migrations/functions em cloud depois de mudanças locais:
+  `npx supabase db push` e `npx supabase functions deploy <nome>` (projeto já
+  linkado via `supabase link --project-ref bmijwtwtnhzyrdusnmak`).
+
 ## Decisões de arquitetura (não reabrir sem motivo)
 
 - **Chaves de IA (Claude/Gemini) ficam no Supabase Vault**, nunca em Edge Function
@@ -128,7 +149,7 @@ treino PPL inicial).
 3. ✅ Treino: visualização, edição manual, execução guiada, cronômetros, offline
 4. ✅ IA: configurações, Edge Function, Claude + Gemini, prévia com diff
 5. ✅ Evolução: medidas, fotos, gráficos, calendário
-6. Deploy (Vercel + Supabase cloud) + instalação no celular
+6. ✅ Deploy (Vercel + Supabase cloud) + instalação no celular
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 

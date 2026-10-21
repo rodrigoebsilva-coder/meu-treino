@@ -2,6 +2,7 @@
 
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import {
@@ -27,15 +28,18 @@ export function GerarForm({
   modeloPadrao,
   temTreinoAtivo,
   exerciciosPorId,
+  tipoAcaoInicial,
   onDescartar,
 }: {
   provedorPadrao: ProvedorIA;
   modeloPadrao: string;
   temTreinoAtivo: boolean;
   exerciciosPorId: Record<string, string>;
+  tipoAcaoInicial?: TipoAcao;
   onDescartar: () => void;
 }) {
-  const [tipoAcao, setTipoAcao] = useState<TipoAcao>(temTreinoAtivo ? "ajustar" : "novo_ciclo");
+  const [tipoAcao, setTipoAcao] = useState<TipoAcao>(tipoAcaoInicial ?? (temTreinoAtivo ? "ajustar" : "novo_ciclo"));
+  const [duracaoSemanas, setDuracaoSemanas] = useState(12);
   const [provedor, setProvedor] = useState<ProvedorIA>(provedorPadrao);
   const [modelo, setModelo] = useState(modeloPadrao);
   const [modelos, setModelos] = useState<ModeloDisponivel[] | null>(null);
@@ -85,6 +89,7 @@ export function GerarForm({
           setModoAjuste(true);
         }}
         onDescartar={onDescartar}
+        duracaoSemanas={tipoAcao === "novo_ciclo" ? duracaoSemanas : null}
       />
     );
   }
@@ -120,6 +125,21 @@ export function GerarForm({
           ))}
         </div>
       </div>
+
+      {tipoAcao === "novo_ciclo" ? (
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="duracaoSemanas">Duração do mesociclo (semanas)</Label>
+          <Input
+            id="duracaoSemanas"
+            type="number"
+            min={1}
+            max={52}
+            value={duracaoSemanas}
+            onChange={(e) => setDuracaoSemanas(Number(e.target.value) || 1)}
+            className="w-24"
+          />
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-2">
         <Label htmlFor="pedidoUsuario">

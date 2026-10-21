@@ -16,6 +16,7 @@ export function DiffPreview({
   exerciciosPorId,
   onAjustar,
   onDescartar,
+  duracaoSemanas,
 }: {
   treino: TreinoGerado;
   provedor: ProvedorIA;
@@ -23,6 +24,7 @@ export function DiffPreview({
   exerciciosPorId: Record<string, string>;
   onAjustar: () => void;
   onDescartar: () => void;
+  duracaoSemanas: number | null;
 }) {
   const router = useRouter();
   const [aprovando, setAprovando] = useState(false);
@@ -31,7 +33,7 @@ export function DiffPreview({
   async function aprovar() {
     setAprovando(true);
     setErro(null);
-    const res = await aprovarTreino(treino, provedor, geracaoId);
+    const res = await aprovarTreino(treino, provedor, geracaoId, duracaoSemanas);
     setAprovando(false);
     if (res.erro) {
       setErro(res.erro);

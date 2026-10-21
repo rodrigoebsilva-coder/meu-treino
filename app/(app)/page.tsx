@@ -3,8 +3,9 @@ import { Flame, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
-import { buscarTreinoAtivo, buscarProximoDia, buscarResumoSemana } from "@/lib/dashboard/dados";
+import { buscarTreinoAtivo, buscarProximosDias, buscarResumoSemana } from "@/lib/dashboard/dados";
 import { calcularStreak } from "@/lib/evolucao/dados";
+import { statusMesociclo } from "@/lib/mesociclo/fases";
 
 function formatarDuracao(segundos: number) {
   const horas = Math.floor(segundos / 3600);
@@ -22,11 +23,14 @@ export default async function HomePage() {
     .maybeSingle();
 
   const treinoAtivo = await buscarTreinoAtivo(supabase);
-  const [proximoDia, resumoSemana, streak] = await Promise.all([
-    treinoAtivo ? buscarProximoDia(supabase, treinoAtivo.dias) : Promise.resolve(null),
+  const [proximosDias, resumoSemana, streak] = await Promise.all([
+    treinoAtivo ? buscarProximosDias(supabase, treinoAtivo.dias, 5) : Promise.resolve([]),
     buscarResumoSemana(supabase),
     calcularStreak(supabase),
   ]);
+  const proximoDia = proximosDias[0] ?? null;
+  const depoisDeHoje = proximosDias.slice(1);
+  const mesociclo = treinoAtivo ? statusMesociclo(treinoAtivo.criado_em, treinoAtivo.duracao_semanas) : null;
 
   return (
     <main className="flex flex-col gap-6 p-6">
@@ -66,6 +70,54 @@ export default async function HomePage() {
           </CardContent>
         </Card>
       )}
+
+      {depoisDeHoje.length > 0 ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Próximos treinos</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground">{depoisDeHoje.map((d) => d.nome).join(" · ")}</p>
+          </CardContent>
+        </Card>
+      ) : null}
+
+      {mesociclo ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Mesociclo</CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-2">
+            {mesociclo.fase ? (
+              <>
+                <div className="flex items-center justify-between text-sm">
+                  <span>
+                    Semana {mesociclo.semana} de {mesociclo.duracaoSemanas}
+                  </span>
+                  <span className="font-medium">{mesociclo.fase.nome}</span>
+                </div>
+                <div className="h-1.5 w-full rounded-full bg-muted">
+                  <div
+                    className="h-full rounded-full bg-primary"
+                    style={{ width: `${Math.min(100, (mesociclo.semana / mesociclo.duracaoSemanas) * 100)}%` }}
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                <p className="text-sm text-muted-foreground">
+                  Seu mesociclo de {mesociclo.duracaoSemanas} semanas terminou — hora de gerar um novo ciclo.
+                </p>
+                <Button
+                  render={<Link href="/treino/gerar-ia?tipoAcao=novo_ciclo">Gerar novo ciclo</Link>}
+                  nativeButton={false}
+                  className="w-fit"
+                />
+              </>
+            )}
+          </CardContent>
+        </Card>
+      ) : null}
 
       <div className="grid grid-cols-2 gap-3">
         <Card>

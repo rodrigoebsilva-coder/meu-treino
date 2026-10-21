@@ -2,9 +2,16 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import type { ProvedorIA } from "@/lib/ai/provider";
+import type { TipoAcao } from "@/lib/ai/schemas";
 import { GerarPageClient } from "./gerar-page-client";
 
-export default async function GerarIaPage() {
+export default async function GerarIaPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ tipoAcao?: string }>;
+}) {
+  const params = await searchParams;
+  const tipoAcaoInicial = params.tipoAcao === "novo_ciclo" ? ("novo_ciclo" as TipoAcao) : undefined;
   const supabase = await createClient();
 
   const { data: config } = await supabase
@@ -38,6 +45,7 @@ export default async function GerarIaPage() {
         modeloPadrao={config.modelo_padrao}
         temTreinoAtivo={!!treinoAtivo}
         exerciciosPorId={exerciciosPorId}
+        tipoAcaoInicial={tipoAcaoInicial}
       />
     </main>
   );

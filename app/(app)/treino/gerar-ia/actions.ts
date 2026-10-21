@@ -49,13 +49,24 @@ export type AprovarState = { erro: string | null };
 export async function aprovarTreino(
   treino: TreinoGerado,
   provedor: ProvedorIA,
-  geracaoId: string
+  geracaoId: string,
+  duracaoSemanasNovoCiclo: number | null
 ): Promise<AprovarState> {
   const supabase = await createClient();
   const { data: userData } = await supabase.auth.getUser();
   if (!userData.user) {
     return { erro: "Sessão expirada. Faça login novamente." };
   }
+
+  // Mesociclo: "ajustar"/"progressão"/"adaptar" continuam o relógio do ciclo
+  // atual (herdam duração e data de início do treino que está sendo
+  // substituído) — só "novo_ciclo" (duracaoSemanasNovoCiclo não-nulo) reseta
+  // o início do mesociclo pra agora.
+  const { data: treinoAnterior } = await supabase
+    .from("treinos")
+    .select("criado_em, duracao_semanas")
+    .eq("status", "ativo")
+    .maybeSingle();
 
   // Só pode existir um treino `ativo` por vez — arquiva o atual antes de
   // criar o novo (nessa ordem, por causa da unique constraint).
@@ -67,6 +78,9 @@ export async function aprovarTreino(
     return { erro: "Não foi possível arquivar o treino anterior." };
   }
 
+  const duracaoSemanas = duracaoSemanasNovoCiclo ?? treinoAnterior?.duracao_semanas ?? 12;
+  const criadoEm = duracaoSemanasNovoCiclo != null || !treinoAnterior ? new Date().toISOString() : treinoAnterior.criado_em;
+
   const { data: novoTreino, error: erroTreino } = await supabase
     .from("treinos")
     .insert({
@@ -75,6 +89,8 @@ export async function aprovarTreino(
       origem: provedor,
       geracao_ia_id: geracaoId,
       justificativa_ia: treino.justificativa,
+      duracao_semanas: duracaoSemanas,
+      criado_em: criadoEm,
     })
     .select("id")
     .single();

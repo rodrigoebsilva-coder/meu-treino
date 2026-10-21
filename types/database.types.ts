@@ -458,6 +458,7 @@ export type Database = {
         Row: {
           arquivado_em: string | null;
           criado_em: string;
+          duracao_semanas: number;
           geracao_ia_id: string | null;
           id: string;
           justificativa_ia: string | null;
@@ -470,6 +471,7 @@ export type Database = {
         Insert: {
           arquivado_em?: string | null;
           criado_em?: string;
+          duracao_semanas?: number;
           geracao_ia_id?: string | null;
           id?: string;
           justificativa_ia?: string | null;
@@ -481,6 +483,7 @@ export type Database = {
         Update: {
           arquivado_em?: string | null;
           criado_em?: string;
+          duracao_semanas?: number;
           geracao_ia_id?: string | null;
           id?: string;
           justificativa_ia?: string | null;
@@ -510,6 +513,8 @@ export type Database = {
           idade: number | null;
           lesoes: string | null;
           local_treino: string | null;
+          meta_peso_kg: number | null;
+          meta_prazo: string | null;
           nivel: string | null;
           objetivo: string | null;
           observacoes: string | null;

@@ -48,6 +48,7 @@ export const TreinoExportSchema = z.object({
   justificativa_ia: z.string().nullable(),
   criado_em: z.string(),
   arquivado_em: z.string().nullable(),
+  duracao_semanas: z.number().int(),
   dias: z.array(TreinoDiaExportSchema),
 });
 

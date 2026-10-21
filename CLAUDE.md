@@ -228,6 +228,32 @@ treino PPL inicial).
   `anamneses` é sempre inserida como versão nova, numerada depois da versão atual —
   nunca sobrescreve. Import não é atômico (mesmo risco aceito do `aprovarTreino`):
   uma sequência de inserts, sem RPC transacional.
+- **Mesociclo é regra fixa no app, não decidido pela IA** (`lib/mesociclo/fases.ts`):
+  duração em semanas escolhida pelo usuário só ao gerar um **novo ciclo** (default
+  12), e as fases (Acumulação/Intensificação/Deload) saem de uma heurística fixa
+  (~60% acumulação, ~25% intensificação, ~15% deload, mínimo 1 semana cada). Decisão
+  deliberada pra não mexer no contrato JSON compartilhado entre Next.js e a Edge
+  Function (`supabase/functions/_shared/schemas.ts`) que já funciona em produção.
+- **`treinos.duracao_semanas` + `criado_em` representam o relógio do mesociclo, não
+  de cada linha de `treinos`** — como toda aprovação de proposta da IA cria uma linha
+  nova em `treinos` (arquivando a anterior, mesmo pra "ajustar"/"progressão de
+  cargas"/"adaptar pra casa"), `aprovarTreino` só reseta `criado_em` pra agora e pede
+  a duração de novo quando o tipo de ação é **"novo ciclo"**; qualquer outro tipo de
+  ação herda `criado_em`/`duracao_semanas` do treino que está sendo substituído, pra
+  continuar contando a semana certa do mesmo mesociclo em vez de reiniciar o relógio
+  a cada ajuste pontual.
+- **"Calendário prospectivo" é uma lista dos próximos dias na ordem do ciclo, sem
+  datas** (`buscarProximosDias` em `lib/dashboard/dados.ts`) — o app não sabe em qual
+  dia da semana o usuário treina (decisão da Fase 3: "treina quando pode"), então
+  projetar datas de verdade seria inventar uma agenda que não existe. Mostra só a
+  sequência (ex.: "Legs A · Push B · Pull B..."), não um grid de calendário.
+- **Regeneração do plano ao fim do mesociclo é via CTA, não automática em segundo
+  plano** — não tem cron configurado no projeto (Supabase `pg_cron` ou similar), e
+  criar essa infra só pra isso seria desproporcional pra um app de usuário único. Em
+  vez disso, o dashboard "Hoje" detecta `semana > duracao_semanas` e mostra um
+  botão "Gerar novo ciclo" (`/treino/gerar-ia?tipoAcao=novo_ciclo`, que pré-seleciona
+  o tipo de ação — sem esse parâmetro o form.default pra "ajustar" quando já existe
+  um treino ativo).
 - **"Apagar todos os dados" precisou de uma policy de `delete` nova em `anamneses`**
   (migration 0012) — a tabela não tinha nenhuma (decisão deliberada da 0001: "nunca
   apagada" pelo fluxo normal do app). Sem a policy, o apagar-tudo falhava *em
@@ -259,8 +285,9 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
    realismo da meta
 9. ✅ Dashboard "Hoje": progresso semanal + relatório exportável (PDF via print)
 10. ✅ Ajustes: exportar/importar dados, apagar todos os dados, aviso legal/médico
-11. ⬜ Mesociclo: periodização de 12 semanas, calendário prospectivo, regeneração
-    automática do plano pela IA ao fim do ciclo (mais estrutural, fica por último)
+11. ✅ Mesociclo: periodização configurável em semanas, calendário prospectivo,
+    aviso + CTA de regeneração do plano ao fim do ciclo (mais estrutural, fica por
+    último)
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 

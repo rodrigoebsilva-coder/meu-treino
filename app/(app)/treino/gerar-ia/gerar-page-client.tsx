@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ProvedorIA } from "@/lib/ai/provider";
+import type { TipoAcao } from "@/lib/ai/schemas";
 import { GerarForm } from "./gerar-form";
 
 export function GerarPageClient({
@@ -9,11 +10,13 @@ export function GerarPageClient({
   modeloPadrao,
   temTreinoAtivo,
   exerciciosPorId,
+  tipoAcaoInicial,
 }: {
   provedorPadrao: ProvedorIA;
   modeloPadrao: string;
   temTreinoAtivo: boolean;
   exerciciosPorId: Record<string, string>;
+  tipoAcaoInicial?: TipoAcao;
 }) {
   // Trocar a `key` remonta o GerarForm do zero — é como "descartar" reseta o
   // useActionState interno dele sem precisar de um método de reset próprio.
@@ -26,6 +29,7 @@ export function GerarPageClient({
       modeloPadrao={modeloPadrao}
       temTreinoAtivo={temTreinoAtivo}
       exerciciosPorId={exerciciosPorId}
+      tipoAcaoInicial={tipoAcaoInicial}
       onDescartar={() => setGeracao((g) => g + 1)}
     />
   );

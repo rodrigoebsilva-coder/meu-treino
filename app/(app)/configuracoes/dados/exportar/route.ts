@@ -23,7 +23,7 @@ export async function GET() {
       supabase
         .from("treinos")
         .select(
-          "nome_ciclo, status, origem, justificativa_ia, criado_em, arquivado_em, treino_dias(id, ordem, nome, grupos_musculares, treino_exercicios(id, exercicio_id, nome_exercicio_sugerido, ordem, series, repeticoes_min, repeticoes_max, carga_sugerida_kg, descanso_segundos, metodo, observacao, exercicios(nome)))"
+          "nome_ciclo, status, origem, justificativa_ia, criado_em, arquivado_em, duracao_semanas, treino_dias(id, ordem, nome, grupos_musculares, treino_exercicios(id, exercicio_id, nome_exercicio_sugerido, ordem, series, repeticoes_min, repeticoes_max, carga_sugerida_kg, descanso_segundos, metodo, observacao, exercicios(nome)))"
         ),
       supabase
         .from("sessoes")
@@ -50,6 +50,7 @@ export async function GET() {
       justificativa_ia: t.justificativa_ia,
       criado_em: t.criado_em,
       arquivado_em: t.arquivado_em,
+      duracao_semanas: t.duracao_semanas,
       dias: [...t.treino_dias]
         .sort((a, b) => a.ordem - b.ordem)
         .map((d) => ({

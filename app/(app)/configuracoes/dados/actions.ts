@@ -100,6 +100,7 @@ async function aplicarImportacao(
         justificativa_ia: treino.justificativa_ia,
         criado_em: treino.criado_em,
         arquivado_em: status === "arquivado" ? (treino.arquivado_em ?? new Date().toISOString()) : null,
+        duracao_semanas: treino.duracao_semanas,
       })
       .select("id")
       .single();

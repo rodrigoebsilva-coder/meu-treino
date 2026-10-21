@@ -14,6 +14,7 @@ import { sincronizar } from "@/lib/offline/sync";
 import { extrairYoutubeId, type TreinoDiaCompleto } from "@/lib/treino/types";
 import { useRestTimer } from "./use-rest-timer";
 import { RestTimerOverlay } from "./rest-timer-overlay";
+import { CheckinDialog, type CheckinValores } from "./checkin-dialog";
 
 type Sugestao = { cargaRealKg: number | null; repeticoesReal: number | null };
 type ValoresSerie = { carga: string; reps: string; rpe: string };
@@ -33,11 +34,31 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
   const [elapsed, setElapsed] = useState(0);
   const [videoAberto, setVideoAberto] = useState<string | null>(null);
   const [dicaCasaAberta, setDicaCasaAberta] = useState<string | null>(null);
+  const [checkinPendente, setCheckinPendente] = useState(false);
   const descanso = useRestTimer();
+
+  async function criarSessao(checkin: CheckinValores) {
+    const idLocal = crypto.randomUUID();
+    const agora = new Date().toISOString();
+    await db.sessoesLocais.add({
+      idLocal,
+      idRemoto: null,
+      treinoDiaId,
+      iniciadaEm: agora,
+      finalizadaEm: null,
+      duracaoSegundos: null,
+      sincronizada: false,
+      ...checkin,
+    });
+    setSessaoIdLocal(idLocal);
+    setIniciadaEm(agora);
+    setCheckinPendente(false);
+  }
 
   // Carrega o dia do cache local (funciona offline) e garante uma sessão
   // local — reaproveita uma sessão já iniciada se a página foi recarregada
-  // no meio do treino.
+  // no meio do treino. Pra uma sessão nova, só cria a sessão depois do
+  // check-in (energia/sono/dor/notas) — ver criarSessao().
   useEffect(() => {
     let ativo = true;
 
@@ -57,19 +78,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
         setSessaoIdLocal(existente.idLocal);
         setIniciadaEm(existente.iniciadaEm);
       } else {
-        const idLocal = crypto.randomUUID();
-        const agora = new Date().toISOString();
-        await db.sessoesLocais.add({
-          idLocal,
-          idRemoto: null,
-          treinoDiaId,
-          iniciadaEm: agora,
-          finalizadaEm: null,
-          duracaoSegundos: null,
-          sincronizada: false,
-        });
-        setSessaoIdLocal(idLocal);
-        setIniciadaEm(agora);
+        setCheckinPendente(true);
       }
     }
 
@@ -215,6 +224,12 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
 
   return (
     <main className="flex flex-col gap-4 p-6 pb-4">
+      <CheckinDialog
+        aberto={checkinPendente}
+        onConfirmar={criarSessao}
+        onPular={() => criarSessao({ energia: null, sono: null, dor: null, notas: null })}
+      />
+
       <div className="flex items-center justify-between">
         <h1 className="text-xl font-semibold">{dia.nome}</h1>
         <span className="font-mono text-sm text-muted-foreground">

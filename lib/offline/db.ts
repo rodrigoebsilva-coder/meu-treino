@@ -15,6 +15,12 @@ export interface SessaoLocal {
   finalizadaEm: string | null;
   duracaoSegundos: number | null;
   sincronizada: boolean;
+  // Check-in preenchido antes da primeira série (Fase 7) — não é indexado,
+  // não precisa subir a versão do Dexie pra adicionar esses campos.
+  energia: number | null;
+  sono: number | null;
+  dor: string | null;
+  notas: string | null;
 }
 
 export interface SerieLocal {

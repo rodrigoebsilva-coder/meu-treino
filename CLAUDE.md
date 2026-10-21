@@ -184,6 +184,26 @@ treino PPL inicial).
   contagem grande + botão "+15s". `estender()` no hook soma aos dois, `endsAt` e
   `duracaoTotal` (guardados em `sessionStorage`), pra o anel não saltar — sem isso o
   progresso visual ficaria incoerente com o tempo restante depois de estender.
+- **Check-in (energia/sono/dor/notas) fica em `sessoes`**, não numa tabela própria —
+  sempre ligado a um treino específico, o que permite cruzar "dormi mal" com o
+  desempenho registrado naquele treino. Capturado uma vez por sessão, antes da
+  primeira série: `execucao-client.tsx` só cria a `SessaoLocal` (Dexie) depois que o
+  `CheckinDialog` é respondido ou pulado — `iniciadaEm`/o cronômetro da sessão
+  começam nesse momento, não no load da página. Pular preenche os 4 campos com null
+  (não é obrigatório).
+- **View com `select *` não acompanha `ALTER TABLE` automaticamente**: Postgres
+  expande o `*` de uma view pra lista de colunas no momento em que ela é criada, não
+  dinamicamente. Adicionar `meta_peso_kg`/`meta_prazo` em `anamneses` (migration
+  0010) não apareceu em `anamnese_atual` até rodar `create or replace view` com o
+  mesmo texto (migration 0011) — bug real, encontrado testando (a checagem de
+  realismo da meta nunca aparecia). Qualquer `alter table` futuro numa tabela que
+  tenha uma view `select *` por cima precisa do mesmo `create or replace view` junto.
+- **Checagem de realismo da meta** (`lib/perfil/meta.ts`, `avaliarMeta()`): compara o
+  ritmo kg/semana pedido (peso-alvo vs. peso atual, dividido pelas semanas até
+  `meta_prazo`) contra uma heurística de ritmo seguro (~1%/semana do peso corporal
+  pra perda, ~0,5%/semana pra ganho — teto biológico menor). Até 1,5x o ritmo seguro
+  ainda conta como realista. "Peso atual" é a medida mais recente em `medidas`, com
+  fallback pro `peso_inicial_kg` da anamnese se não houver nenhuma medida registrada.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
@@ -200,9 +220,9 @@ treino, também criado com Claude): catalogar os recursos que ele tem e esse app
 tem, e trazer pra cá **sem remover nada do que já existe** (pedido explícito do
 usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxima.
 
-7. 🚧 Execução: timer de descanso em tela cheia (+15s), toggles de som/vibração,
+7. ✅ Execução: timer de descanso em tela cheia (+15s), toggles de som/vibração,
    dica de alternativa em casa por exercício
-8. ⬜ Check-in completo: energia/sono/dor/notas no check-in, checagem de
+8. ✅ Check-in completo: energia/sono/dor/notas no check-in, checagem de
    realismo da meta
 9. ⬜ Dashboard "Hoje": progresso semanal + relatório exportável (PDF via print)
 10. ⬜ Ajustes: exportar/importar dados, apagar todos os dados, aviso legal/médico

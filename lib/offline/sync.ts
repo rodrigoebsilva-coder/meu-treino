@@ -44,7 +44,14 @@ async function sincronizarUmaVez() {
     if (!idRemoto) {
       const { data, error } = await supabase
         .from("sessoes")
-        .insert({ treino_dia_id: sessao.treinoDiaId, iniciada_em: sessao.iniciadaEm })
+        .insert({
+          treino_dia_id: sessao.treinoDiaId,
+          iniciada_em: sessao.iniciadaEm,
+          energia: sessao.energia,
+          sono: sessao.sono,
+          dor: sessao.dor,
+          notas: sessao.notas,
+        })
         .select("id")
         .single();
       if (error || !data) continue;

@@ -32,6 +32,8 @@ export type Database = {
           idade: number;
           lesoes: string | null;
           local_treino: string;
+          meta_peso_kg: number | null;
+          meta_prazo: string | null;
           nivel: string;
           objetivo: string;
           observacoes: string | null;
@@ -48,6 +50,8 @@ export type Database = {
           idade: number;
           lesoes?: string | null;
           local_treino: string;
+          meta_peso_kg?: number | null;
+          meta_prazo?: string | null;
           nivel: string;
           objetivo: string;
           observacoes?: string | null;
@@ -63,6 +67,8 @@ export type Database = {
           idade?: number;
           lesoes?: string | null;
           local_treino?: string;
+          meta_peso_kg?: number | null;
+          meta_prazo?: string | null;
           nivel?: string;
           objetivo?: string;
           observacoes?: string | null;
@@ -302,27 +308,39 @@ export type Database = {
       };
       sessoes: {
         Row: {
+          dor: string | null;
           duracao_segundos: number | null;
+          energia: number | null;
           finalizada_em: string | null;
           id: string;
           iniciada_em: string;
+          notas: string | null;
+          sono: number | null;
           treino_dia_id: string | null;
           user_id: string;
         };
         ComputedFields: never;
         Insert: {
+          dor?: string | null;
           duracao_segundos?: number | null;
+          energia?: number | null;
           finalizada_em?: string | null;
           id?: string;
           iniciada_em?: string;
+          notas?: string | null;
+          sono?: number | null;
           treino_dia_id?: string | null;
           user_id?: string;
         };
         Update: {
+          dor?: string | null;
           duracao_segundos?: number | null;
+          energia?: number | null;
           finalizada_em?: string | null;
           id?: string;
           iniciada_em?: string;
+          notas?: string | null;
+          sono?: number | null;
           treino_dia_id?: string | null;
           user_id?: string;
         };

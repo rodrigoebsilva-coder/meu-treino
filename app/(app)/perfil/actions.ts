@@ -20,6 +20,8 @@ export async function salvarAnamnese(
     dias_disponiveis: formData.get("dias_disponiveis"),
     local_treino: formData.get("local_treino"),
     observacoes: formData.get("observacoes") || undefined,
+    meta_peso_kg: formData.get("meta_peso_kg") || undefined,
+    meta_prazo: formData.get("meta_prazo") || undefined,
   });
 
   if (!parsed.success) {
@@ -46,6 +48,8 @@ export async function salvarAnamnese(
     ...parsed.data,
     lesoes: parsed.data.lesoes ?? null,
     observacoes: parsed.data.observacoes ?? null,
+    meta_peso_kg: parsed.data.meta_peso_kg ?? null,
+    meta_prazo: parsed.data.meta_prazo ?? null,
     versao: proximaVersao,
     user_id: userData.user.id,
   });

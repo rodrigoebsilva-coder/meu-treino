@@ -10,6 +10,8 @@ export const AnamneseSchema = z.object({
   dias_disponiveis: z.coerce.number().int().min(1).max(7),
   local_treino: z.enum(["academia", "casa", "hibrido"]),
   observacoes: z.string().trim().max(2000).optional(),
+  meta_peso_kg: z.coerce.number().min(30).max(300).optional(),
+  meta_prazo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida").optional(),
 });
 
 export type AnamneseInput = z.infer<typeof AnamneseSchema>;

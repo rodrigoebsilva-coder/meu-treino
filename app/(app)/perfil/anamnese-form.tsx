@@ -100,6 +100,23 @@ export function AnamneseForm({ anamnese }: { anamnese: AnamneseInput | null }) {
         </div>
       </div>
 
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="meta_peso_kg">Peso-alvo (kg, opcional)</Label>
+          <Input
+            id="meta_peso_kg"
+            name="meta_peso_kg"
+            type="number"
+            step="0.1"
+            defaultValue={anamnese?.meta_peso_kg ?? ""}
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="meta_prazo">Prazo (opcional)</Label>
+          <Input id="meta_prazo" name="meta_prazo" type="date" defaultValue={anamnese?.meta_prazo ?? ""} />
+        </div>
+      </div>
+
       <div className="flex flex-col gap-2">
         <Label htmlFor="lesoes">Lesões (opcional)</Label>
         <Textarea id="lesoes" name="lesoes" defaultValue={anamnese?.lesoes ?? ""} />

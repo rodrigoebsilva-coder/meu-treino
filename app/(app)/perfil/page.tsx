@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
 import { NIVEL_LABEL, LOCAL_TREINO_LABEL, type AnamneseInput } from "@/lib/perfil/schema";
 import { AnamneseForm } from "./anamnese-form";
+import { MetaRealismo } from "./meta-realismo";
 
 export default async function PerfilPage() {
   const supabase = await createClient();
@@ -15,6 +16,18 @@ export default async function PerfilPage() {
     .from("anamneses")
     .select("versao, objetivo, nivel, local_treino, criado_em")
     .order("versao", { ascending: false });
+
+  let pesoAtualKg = atual?.peso_inicial_kg ?? null;
+  if (atual) {
+    const { data: ultimaMedida } = await supabase
+      .from("medidas")
+      .select("peso_kg")
+      .not("peso_kg", "is", null)
+      .order("registrado_em", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (ultimaMedida?.peso_kg) pesoAtualKg = ultimaMedida.peso_kg;
+  }
 
   return (
     <main className="flex flex-col gap-6 p-6">
@@ -30,6 +43,10 @@ export default async function PerfilPage() {
           <AnamneseForm anamnese={atual ?? null} />
         </CardContent>
       </Card>
+
+      {atual?.meta_peso_kg && atual?.meta_prazo && pesoAtualKg ? (
+        <MetaRealismo pesoAtualKg={pesoAtualKg} pesoAlvoKg={atual.meta_peso_kg} metaPrazo={atual.meta_prazo} />
+      ) : null}
 
       {historico && historico.length > 1 ? (
         <Card>

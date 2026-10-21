@@ -214,6 +214,29 @@ treino PPL inicial).
   (sem ciclo ativo, últimos 90 dias), pra sempre refletir o bloco de treino em
   andamento em vez de uma janela fixa arbitrária. `print:hidden` no `BottomNav` e no
   botão "Exportar PDF" esconde a navegação do app na hora de imprimir/exportar.
+- **Export/import de dados (`/configuracoes/dados`) é JSON próprio, não um dump de
+  tabelas** — fotos de progresso ficam de fora (binário no Storage, não cabe bem num
+  JSON; documentado na própria tela). Export é uma Route Handler (`exportar/route.ts`,
+  não Server Action) pra poder setar `Content-Disposition: attachment` e devolver um
+  download de verdade. Import remapeia todo id (exercícios do usuário, dias, 
+  exercícios-de-treino) pra não colidir com o que já existe no banco — nunca reusa o id
+  original. **Treino importado sempre entra `arquivado`**, exceto quando não existe
+  nenhum treino `ativo` no momento E existe exatamente um candidato `ativo` no
+  arquivo (aí ele volta a ficar ativo) — evita tanto esbarrar na unique constraint de
+  "um ativo por vez" quanto trocar o treino em uso silenciosamente num import de
+  mescla. `medidas` usa `upsert` (mesma chave `user_id, registrado_em` do app);
+  `anamneses` é sempre inserida como versão nova, numerada depois da versão atual —
+  nunca sobrescreve. Import não é atômico (mesmo risco aceito do `aprovarTreino`):
+  uma sequência de inserts, sem RPC transacional.
+- **"Apagar todos os dados" precisou de uma policy de `delete` nova em `anamneses`**
+  (migration 0012) — a tabela não tinha nenhuma (decisão deliberada da 0001: "nunca
+  apagada" pelo fluxo normal do app). Sem a policy, o apagar-tudo falhava *em
+  silêncio* só nessa tabela via RLS (bug real, encontrado testando: sobrava 1 linha
+  depois de "apagar tudo"). A policy nova é restrita ao próprio dono e só serve pra
+  esse reset completo explícito — o app continua nunca chamando `delete` em
+  `anamneses` em nenhum outro fluxo. "Apagar tudo" cobre anamnese/treinos/sessões/
+  medidas/fotos/exercícios próprios; **não mexe em `config_ia` nem nas chaves de IA
+  no Vault** — é reset de dado de treino/saúde, não de conta.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
@@ -235,7 +258,7 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
 8. ✅ Check-in completo: energia/sono/dor/notas no check-in, checagem de
    realismo da meta
 9. ✅ Dashboard "Hoje": progresso semanal + relatório exportável (PDF via print)
-10. ⬜ Ajustes: exportar/importar dados, apagar todos os dados, aviso legal/médico
+10. ✅ Ajustes: exportar/importar dados, apagar todos os dados, aviso legal/médico
 11. ⬜ Mesociclo: periodização de 12 semanas, calendário prospectivo, regeneração
     automática do plano pela IA ao fim do ciclo (mais estrutural, fica por último)
 

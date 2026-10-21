@@ -33,6 +33,14 @@ export default async function PerfilPage() {
     <main className="flex flex-col gap-6 p-6">
       <h1 className="text-2xl font-semibold">Perfil</h1>
 
+      <p className="text-xs text-muted-foreground">
+        Os planos aqui são sugestões de IA, não supervisão profissional.{" "}
+        <a href="/aviso-legal" className="underline underline-offset-4">
+          Leia o aviso legal e médico
+        </a>
+        .
+      </p>
+
       <Card>
         <CardHeader>
           <CardTitle>

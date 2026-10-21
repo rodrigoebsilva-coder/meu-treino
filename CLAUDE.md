@@ -110,6 +110,20 @@ treino PPL inicial).
   intercepta os assets do Turbopack/HMR e quebra a navegação em `next dev`.
 - **Sem `cacheComponents`/`partialPrefetching`**: toda rota em `(app)` e `(auth)`
   depende de `cookies()` (sessão), então não existe shell estático que valha gerar.
+- **Reordenar exercícios é clica-e-arrasta (`@dnd-kit/core`+`sortable`+`utilities`)**,
+  não mais os botões de seta cima/baixo da Fase 3 — reverte aquela decisão a pedido
+  explícito do usuário ("não tá funcionando bem"). `DndContext`+`SortableContext` em
+  `treino-dia-card.tsx`, com `PointerSensor` (funciona com mouse e touch) e um
+  `activationConstraint: { distance: 8 }` pra não brigar com o tap de
+  expandir/colapsar o card nem com o scroll da página — só a alcinha
+  (`GripVertical`, `touch-none`) inicia o arrasto, o resto da linha não. O servidor
+  (`reordenarExercicios`, uma lista inteira de ids de uma vez) sempre regrava `ordem`
+  em duas passadas (negativa temporária, depois final) pra nunca colidir com a unique
+  constraint `(treino_dia_id, ordem)` no meio do caminho. **Testar automação de
+  drag-and-drop via `left_click_drag` não funciona** (não gera `pointermove`
+  suficiente pro `PointerSensor` ativar) — testar via `javascript_tool` disparando
+  `PointerEvent`s manualmente (pointerdown → vários pointermove incrementais →
+  pointerup).
 - **Login só e-mail/senha** (não implementei magic link): mais simples pra single-user
   e pro seed de dev local; pode virar opção extra depois sem mudar o schema.
 - **Anamnese nunca é sobrescrita**: editar sempre insere uma nova linha com

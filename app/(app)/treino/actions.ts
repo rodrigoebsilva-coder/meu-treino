@@ -79,46 +79,31 @@ export async function removerExercicio(treinoExercicioId: string): Promise<AcaoS
   return OK;
 }
 
-export async function reordenarExercicio(
-  treinoDiaId: string,
-  treinoExercicioId: string,
-  direcao: "cima" | "baixo"
-): Promise<AcaoState> {
+// Reordenação por arrastar (clica e arrasta, substituiu as antigas setas
+// cima/baixo) — recebe a lista inteira de ids na ordem final e regrava
+// `ordem` de todos de uma vez. Dois passos (uma faixa negativa temporária,
+// depois os valores finais) pra nunca colidir com a unique constraint
+// (treino_dia_id, ordem) no meio do caminho.
+export async function reordenarExercicios(idsEmOrdem: string[]): Promise<AcaoState> {
   const supabase = await createClient();
 
-  const { data: exercicios, error: erroSelect } = await supabase
-    .from("treino_exercicios")
-    .select("id, ordem")
-    .eq("treino_dia_id", treinoDiaId)
-    .order("ordem", { ascending: true });
-
-  if (erroSelect || !exercicios) {
-    return { error: "Não foi possível reordenar." };
+  for (let i = 0; i < idsEmOrdem.length; i++) {
+    const { error } = await supabase
+      .from("treino_exercicios")
+      .update({ ordem: -(i + 1) })
+      .eq("id", idsEmOrdem[i]);
+    if (error) return { error: "Não foi possível reordenar." };
   }
 
-  const index = exercicios.findIndex((e) => e.id === treinoExercicioId);
-  const vizinhoIndex = direcao === "cima" ? index - 1 : index + 1;
-
-  if (index < 0 || vizinhoIndex < 0 || vizinhoIndex >= exercicios.length) {
-    return OK;
-  }
-
-  const atual = exercicios[index];
-  const vizinho = exercicios[vizinhoIndex];
-
-  // Troca via um valor temporário: evita colidir com a unique constraint
-  // (treino_dia_id, ordem) no meio da operação.
-  await supabase.from("treino_exercicios").update({ ordem: -1 }).eq("id", atual.id);
-  await supabase.from("treino_exercicios").update({ ordem: atual.ordem }).eq("id", vizinho.id);
-  const { error } = await supabase
-    .from("treino_exercicios")
-    .update({ ordem: vizinho.ordem })
-    .eq("id", atual.id);
-
-  if (error) {
-    return { error: "Não foi possível reordenar." };
+  for (let i = 0; i < idsEmOrdem.length; i++) {
+    const { error } = await supabase
+      .from("treino_exercicios")
+      .update({ ordem: i + 1 })
+      .eq("id", idsEmOrdem[i]);
+    if (error) return { error: "Não foi possível reordenar." };
   }
 
   revalidatePath("/treino");
   return OK;
 }
+

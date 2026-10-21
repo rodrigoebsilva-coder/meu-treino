@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { SoliaLogo } from "@/components/solia-logo";
 import { BottomNav } from "./bottom-nav";
 import { SyncBoot } from "./sync-boot";
 
@@ -16,8 +17,9 @@ export default async function AppLayout({ children }: { children: React.ReactNod
       <SyncBoot />
       <div className="flex-1 pb-16">
         {children}
-        <footer className="p-6 pt-0 text-center text-xs text-muted-foreground print:hidden">
-          Criado por SolIA Labs
+        <footer className="flex flex-col items-center gap-1 p-6 pt-0 text-xs text-muted-foreground print:hidden">
+          <span>Criado por</span>
+          <SoliaLogo className="text-foreground" />
         </footer>
       </div>
       <BottomNav />

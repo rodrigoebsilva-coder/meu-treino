@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabase/server";
 import { buscarTreinoAtivo, buscarProximosDias, buscarResumoSemana } from "@/lib/dashboard/dados";
 import { calcularStreak } from "@/lib/evolucao/dados";
 import { statusMesociclo } from "@/lib/mesociclo/fases";
+import { SoliaLogo } from "@/components/solia-logo";
 
 function formatarDuracao(segundos: number) {
   const horas = Math.floor(segundos / 3600);
@@ -41,6 +42,8 @@ export default async function HomePage() {
 
   return (
     <main className="flex flex-col gap-6 p-6">
+      <SoliaLogo className="text-sm text-muted-foreground" />
+
       <h1 className="font-heading text-2xl font-semibold">{saudacao(new Date().getHours())} 👋</h1>
 
       {anamnese ? (

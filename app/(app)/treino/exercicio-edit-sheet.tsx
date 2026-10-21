@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { atualizarExercicio, type AcaoState } from "./actions";
+import { atualizarDicaCasa, atualizarExercicio, type AcaoState } from "./actions";
 import { METODO_LABEL, type ExercicioResumo, type TreinoExercicioComDados, type MetodoSerie } from "@/lib/treino/types";
 
 const INITIAL_STATE: AcaoState = { error: null };
@@ -37,6 +37,14 @@ export function ExercicioEditSheet({
 }) {
   const acao = atualizarExercicio.bind(null, treinoExercicio.id);
   const [state, formAction, pending] = useActionState(acao, INITIAL_STATE);
+
+  const acaoDicaCasa = treinoExercicio.exercicio_id
+    ? atualizarDicaCasa.bind(null, treinoExercicio.exercicio_id)
+    : null;
+  const [stateDicaCasa, formActionDicaCasa, pendingDicaCasa] = useActionState(
+    acaoDicaCasa ?? ((prev: AcaoState) => Promise.resolve(prev)),
+    INITIAL_STATE
+  );
 
   return (
     <Sheet open={aberto} onOpenChange={onOpenChange}>
@@ -149,6 +157,22 @@ export function ExercicioEditSheet({
             </Button>
           </SheetFooter>
         </form>
+
+        {acaoDicaCasa ? (
+          <form action={formActionDicaCasa} className="flex flex-col gap-2 border-t border-border px-4 pt-4">
+            <Label htmlFor="dica_casa">Alternativa em casa (opcional)</Label>
+            <Textarea
+              id="dica_casa"
+              name="dica_casa"
+              placeholder="Ex.: agachamento com mochila cheia nas costas"
+              defaultValue={treinoExercicio.exercicio?.dica_casa ?? ""}
+            />
+            {stateDicaCasa.error ? <p className="text-sm text-destructive">{stateDicaCasa.error}</p> : null}
+            <Button type="submit" variant="outline" disabled={pendingDicaCasa} className="w-fit">
+              {pendingDicaCasa ? "Salvando..." : "Salvar alternativa"}
+            </Button>
+          </form>
+        ) : null}
       </SheetContent>
     </Sheet>
   );

@@ -162,6 +162,28 @@ treino PPL inicial).
   `createSignedUrl` gerada no server component (bucket é privado); `next/image` com
   `unoptimized` pra não precisar configurar `remotePatterns` pra um host que muda a
   cada ambiente (local vs. cloud).
+- **`dica_casa` (alternativa de exercício pra treinar em casa) mora em `exercicios`**,
+  não em `treino_exercicios` — é propriedade do exercício em si (qualquer treino que
+  use esse exercício herda a dica), não da instância dentro de um treino específico.
+  Curadoria dos 30 exercícios do PPL seedado fica em
+  `supabase/seeds/04_dica_casa.sql`, **não na migration**: migrations rodam antes dos
+  seeds no `db reset` local, e os 876 exercícios só existem depois que
+  `01_exercicios.sql` roda — um `UPDATE` na migration não acharia nenhuma linha (bug
+  real, encontrado testando; a migration 0007 só faz o `ALTER TABLE ADD COLUMN`).
+- **Editar `dica_casa` pelo app usa uma função `SECURITY DEFINER`**
+  (`atualizar_dica_casa`, migration 0008), não um `UPDATE` direto client-side: a RLS de
+  `exercicios` só libera update pra `origem='usuario'`, e a maioria dos exercícios é
+  `origem='base'` (seed). Mesmo padrão das funções do Vault — só altera essa coluna,
+  nunca nome/grupo_muscular/etc.
+- **Preferências de timer (som/vibração ao fim do descanso) ficam em `localStorage`**
+  (`lib/preferencias/timer.ts`), não no banco — é ajuste por aparelho, não dado do
+  usuário. Lidas com a mesma convenção de inicializador `useState` preguiçoso do timer
+  (evita `useEffect` + `set-state-in-effect` do ESLint).
+- **Timer de descanso em tela cheia** (`rest-timer-overlay.tsx`) substituiu a barra
+  fixa no rodapé: anel circular SVG (`strokeDashoffset` sobre a circunferência) +
+  contagem grande + botão "+15s". `estender()` no hook soma aos dois, `endsAt` e
+  `duracaoTotal` (guardados em `sessionStorage`), pra o anel não saltar — sem isso o
+  progresso visual ficaria incoerente com o tempo restante depois de estender.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
@@ -172,6 +194,20 @@ treino PPL inicial).
 4. ✅ IA: configurações, Edge Function, Claude + Gemini, prévia com diff
 5. ✅ Evolução: medidas, fotos, gráficos, calendário
 6. ✅ Deploy (Vercel + Supabase cloud) + instalação no celular
+
+Fases 7–11 abaixo vieram da análise de https://mt-rodrigo.netlify.app (outro app de
+treino, também criado com Claude): catalogar os recursos que ele tem e esse app não
+tem, e trazer pra cá **sem remover nada do que já existe** (pedido explícito do
+usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxima.
+
+7. 🚧 Execução: timer de descanso em tela cheia (+15s), toggles de som/vibração,
+   dica de alternativa em casa por exercício
+8. ⬜ Check-in completo: energia/sono/dor/notas no check-in, checagem de
+   realismo da meta
+9. ⬜ Dashboard "Hoje": progresso semanal + relatório exportável (PDF via print)
+10. ⬜ Ajustes: exportar/importar dados, apagar todos os dados, aviso legal/médico
+11. ⬜ Mesociclo: periodização de 12 semanas, calendário prospectivo, regeneração
+    automática do plano pela IA ao fim do ciclo (mais estrutural, fica por último)
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 

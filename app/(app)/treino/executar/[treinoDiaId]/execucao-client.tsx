@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
-import { Play } from "lucide-react";
+import { Home, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -13,6 +13,7 @@ import { createClient } from "@/lib/supabase/client";
 import { sincronizar } from "@/lib/offline/sync";
 import { extrairYoutubeId, type TreinoDiaCompleto } from "@/lib/treino/types";
 import { useRestTimer } from "./use-rest-timer";
+import { RestTimerOverlay } from "./rest-timer-overlay";
 
 type Sugestao = { cargaRealKg: number | null; repeticoesReal: number | null };
 type ValoresSerie = { carga: string; reps: string; rpe: string };
@@ -31,6 +32,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
   const [finalizada, setFinalizada] = useState(false);
   const [elapsed, setElapsed] = useState(0);
   const [videoAberto, setVideoAberto] = useState<string | null>(null);
+  const [dicaCasaAberta, setDicaCasaAberta] = useState<string | null>(null);
   const descanso = useRestTimer();
 
   // Carrega o dia do cache local (funciona offline) e garante uma sessão
@@ -236,6 +238,20 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
               </Button>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
+              {ex.exercicio?.dica_casa ? (
+                <div>
+                  <button
+                    type="button"
+                    className="flex items-center gap-1.5 text-sm text-muted-foreground underline-offset-4 hover:underline"
+                    onClick={() => setDicaCasaAberta((atual) => (atual === ex.id ? null : ex.id))}
+                  >
+                    <Home className="size-3.5" /> Alternativa em casa
+                  </button>
+                  {dicaCasaAberta === ex.id ? (
+                    <p className="mt-1 text-sm text-muted-foreground">{ex.exercicio.dica_casa}</p>
+                  ) : null}
+                </div>
+              ) : null}
               {Array.from({ length: ex.series }, (_, i) => i + 1).map((numeroSerie) => {
                 const chave = chaveSerie(ex.id, numeroSerie);
                 const feita = concluidas[chave];
@@ -293,18 +309,12 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
       </Button>
 
       {descanso.ativo ? (
-        <div className="sticky bottom-20 z-10 flex items-center justify-between rounded-full bg-primary px-4 py-3 text-primary-foreground">
-          <span>Descansando...</span>
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-lg">
-              {String(Math.floor(descanso.restante / 60)).padStart(2, "0")}:
-              {String(descanso.restante % 60).padStart(2, "0")}
-            </span>
-            <Button variant="secondary" size="sm" onClick={descanso.cancelar}>
-              Pular
-            </Button>
-          </div>
-        </div>
+        <RestTimerOverlay
+          restante={descanso.restante}
+          duracaoTotal={descanso.duracaoTotal}
+          onEstender={() => descanso.estender(15)}
+          onPular={descanso.cancelar}
+        />
       ) : null}
 
       <Dialog open={!!videoAberto} onOpenChange={(aberto) => !aberto && setVideoAberto(null)}>

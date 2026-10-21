@@ -23,7 +23,7 @@ export default async function EvolucaoPage() {
     calcularStreak(supabase),
     supabase
       .from("exercicios")
-      .select("id, nome, grupo_muscular, youtube_url")
+      .select("id, nome, grupo_muscular, youtube_url, dica_casa")
       .order("nome", { ascending: true })
       .returns<ExercicioResumo[]>(),
   ]);

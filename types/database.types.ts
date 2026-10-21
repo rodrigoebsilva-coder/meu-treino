@@ -103,6 +103,7 @@ export type Database = {
       exercicios: {
         Row: {
           criado_em: string;
+          dica_casa: string | null;
           equipamento: string | null;
           grupo_muscular: string;
           id: string;
@@ -115,6 +116,7 @@ export type Database = {
         ComputedFields: never;
         Insert: {
           criado_em?: string;
+          dica_casa?: string | null;
           equipamento?: string | null;
           grupo_muscular: string;
           id?: string;
@@ -126,6 +128,7 @@ export type Database = {
         };
         Update: {
           criado_em?: string;
+          dica_casa?: string | null;
           equipamento?: string | null;
           grupo_muscular?: string;
           id?: string;
@@ -501,6 +504,7 @@ export type Database = {
       };
     };
     Functions: {
+      atualizar_dica_casa: { Args: { p_dica: string; p_exercicio_id: string }; Returns: undefined };
       vault_get_ai_key: {
         Args: { p_provedor: Database["public"]["Enums"]["provedor_ia"] };
         Returns: string;

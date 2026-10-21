@@ -46,6 +46,27 @@ export async function atualizarExercicio(
   return OK;
 }
 
+export async function atualizarDicaCasa(
+  exercicioId: string,
+  _prev: AcaoState,
+  formData: FormData
+): Promise<AcaoState> {
+  const dica = (formData.get("dica_casa") as string | null)?.trim() ?? "";
+
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("atualizar_dica_casa", {
+    p_exercicio_id: exercicioId,
+    p_dica: dica,
+  });
+
+  if (error) {
+    return { error: "Não foi possível salvar a dica." };
+  }
+
+  revalidatePath("/treino");
+  return OK;
+}
+
 export async function removerExercicio(treinoExercicioId: string): Promise<AcaoState> {
   const supabase = await createClient();
   const { error } = await supabase.from("treino_exercicios").delete().eq("id", treinoExercicioId);

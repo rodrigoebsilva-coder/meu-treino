@@ -1,0 +1,11 @@
+-- Dica de variação pra treinar em casa, por exercício (Fase 7 — recurso
+-- trazido da análise de mt-rodrigo.netlify.app). Fica em `exercicios` (não em
+-- `treino_exercicios`) porque é uma propriedade do exercício em si, não da
+-- instância dentro de um treino específico — assim qualquer treino (manual
+-- ou gerado por IA) que use esse exercício já herda a dica.
+--
+-- Curadoria dos dados (quais exercícios ganham dica_casa) fica no seed
+-- (supabase/seeds/04_dica_casa.sql), não aqui: migrations rodam antes dos
+-- seeds no `db reset` local, então um UPDATE aqui não acharia os 876
+-- exercícios — eles só existem depois que 01_exercicios.sql roda.
+alter table public.exercicios add column dica_casa text;

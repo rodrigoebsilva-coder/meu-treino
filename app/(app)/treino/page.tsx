@@ -10,7 +10,7 @@ export default async function TreinoPage() {
   const { data: treino } = await supabase
     .from("treinos")
     .select(
-      "*, treino_dias(*, treino_exercicios(*, exercicio:exercicios(id, nome, grupo_muscular, youtube_url)))"
+      "*, treino_dias(*, treino_exercicios(*, exercicio:exercicios(id, nome, grupo_muscular, youtube_url, dica_casa)))"
     )
     .eq("status", "ativo")
     .order("ordem", { referencedTable: "treino_dias", ascending: true })
@@ -19,7 +19,7 @@ export default async function TreinoPage() {
 
   const { data: exercicios } = await supabase
     .from("exercicios")
-    .select("id, nome, grupo_muscular, youtube_url")
+    .select("id, nome, grupo_muscular, youtube_url, dica_casa")
     .order("nome", { ascending: true })
     .returns<ExercicioResumo[]>();
 

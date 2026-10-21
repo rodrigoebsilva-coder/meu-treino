@@ -6,7 +6,7 @@ export type TreinoDia = Database["public"]["Tables"]["treino_dias"]["Row"];
 export type Treino = Database["public"]["Tables"]["treinos"]["Row"];
 export type MetodoSerie = Database["public"]["Enums"]["metodo_serie"];
 
-export type ExercicioResumo = Pick<Exercicio, "id" | "nome" | "grupo_muscular" | "youtube_url">;
+export type ExercicioResumo = Pick<Exercicio, "id" | "nome" | "grupo_muscular" | "youtube_url" | "dica_casa">;
 
 export type TreinoExercicioComDados = TreinoExercicio & {
   exercicio: ExercicioResumo | null;

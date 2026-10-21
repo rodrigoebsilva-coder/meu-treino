@@ -2,12 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Home, Dumbbell, User, Settings } from "lucide-react";
+import { Home, Dumbbell, TrendingUp, User, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const ITENS = [
   { href: "/", label: "Início", Icon: Home },
   { href: "/treino", label: "Treino", Icon: Dumbbell },
+  { href: "/evolucao", label: "Evolução", Icon: TrendingUp },
   { href: "/perfil", label: "Perfil", Icon: User },
   { href: "/configuracoes", label: "Config", Icon: Settings },
 ];

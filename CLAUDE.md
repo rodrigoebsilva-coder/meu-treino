@@ -106,6 +106,19 @@ treino PPL inicial).
   subconjunto OpenAPI que a Gemini aceita (tipos em MAIÚSCULO, `nullable` como
   booleano em vez de union de tipos). Usar `z.toJSONSchema(schema, { reused: "inline" })`
   nos dois providers (Claude e Gemini) pra não lidar com `$ref`/`$defs`.
+- **`medidas` é "um registro por dia" (`unique (user_id, registrado_em)`), salvo via
+  `upsert`** — mas `upsert` substitui a linha inteira. Salvar só o peso num dia que já
+  tinha cintura/peito/braço preenchidos zerava esses campos (bug real, encontrado
+  testando). `salvarMedida` busca a linha existente daquele dia primeiro e mescla os
+  campos não enviados antes do upsert — qualquer outro upsert parcial nessa tabela
+  precisa do mesmo cuidado.
+- **Fotos de progresso**: upload é client-side direto pro Storage
+  (`supabase.storage.from("fotos-progresso").upload(...)`, não via server action —
+  arquivo grande não passa bem por FormData de server action), path
+  `<user_id>/<arquivo>` (a RLS do bucket exige isso). Exibição usa
+  `createSignedUrl` gerada no server component (bucket é privado); `next/image` com
+  `unoptimized` pra não precisar configurar `remotePatterns` pra um host que muda a
+  cada ambiente (local vs. cloud).
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
@@ -114,7 +127,7 @@ treino PPL inicial).
 2. ✅ Login e perfil/anamnese
 3. ✅ Treino: visualização, edição manual, execução guiada, cronômetros, offline
 4. ✅ IA: configurações, Edge Function, Claude + Gemini, prévia com diff
-5. Evolução: medidas, fotos, gráficos, calendário
+5. ✅ Evolução: medidas, fotos, gráficos, calendário
 6. Deploy (Vercel + Supabase cloud) + instalação no celular
 
 ## Pendências conhecidas (não bloqueiam a fase atual)

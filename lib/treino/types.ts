@@ -8,8 +8,11 @@ export type MetodoSerie = Database["public"]["Enums"]["metodo_serie"];
 
 export type ExercicioResumo = Pick<Exercicio, "id" | "nome" | "grupo_muscular" | "youtube_url" | "dica_casa">;
 
+export type AlternativaExercicio = { exercicio_id: string; nome: string };
+
 export type TreinoExercicioComDados = TreinoExercicio & {
   exercicio: ExercicioResumo | null;
+  alternativas: AlternativaExercicio[];
 };
 
 export type TreinoDiaCompleto = TreinoDia & {

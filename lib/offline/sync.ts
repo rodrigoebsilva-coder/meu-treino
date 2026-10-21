@@ -85,6 +85,7 @@ async function sincronizarUmaVez() {
         rpe: serie.rpe,
         concluida_em: serie.concluidaEm,
         origem_offline: true,
+        exercicio_realizado_id: serie.exercicioRealizadoId,
       });
       if (!error) {
         await db.seriesLocais.update(serie.idLocal, { sincronizada: true });

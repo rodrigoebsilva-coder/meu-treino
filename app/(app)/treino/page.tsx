@@ -2,20 +2,38 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { createClient } from "@/lib/supabase/server";
 import type { TreinoCompleto, ExercicioResumo } from "@/lib/treino/types";
+import { gerarAlternativasParaTreino } from "@/lib/treino/alternativas";
 import { TreinoView } from "./treino-view";
+
+const SELECT_TREINO =
+  "*, treino_dias(*, treino_exercicios(*, exercicio:exercicios(id, nome, grupo_muscular, youtube_url, dica_casa), alternativas:treino_exercicio_alternativas(exercicio_id)))";
 
 export default async function TreinoPage() {
   const supabase = await createClient();
 
-  const { data: treino } = await supabase
+  let { data: treino } = await supabase
     .from("treinos")
-    .select(
-      "*, treino_dias(*, treino_exercicios(*, exercicio:exercicios(id, nome, grupo_muscular, youtube_url, dica_casa)))"
-    )
+    .select(SELECT_TREINO)
     .eq("status", "ativo")
     .order("ordem", { referencedTable: "treino_dias", ascending: true })
     .order("ordem", { referencedTable: "treino_dias.treino_exercicios", ascending: true })
     .maybeSingle<TreinoCompleto>();
+
+  // Backfill/rede de segurança: treinos de antes dessa feature (ou
+  // exercícios adicionados manualmente) podem não ter alternativas ainda.
+  const faltaAlternativa = treino?.treino_dias.some((d) =>
+    d.treino_exercicios.some((te) => te.exercicio_id && te.alternativas.length === 0)
+  );
+  if (treino && faltaAlternativa) {
+    await gerarAlternativasParaTreino(supabase, treino.id);
+    ({ data: treino } = await supabase
+      .from("treinos")
+      .select(SELECT_TREINO)
+      .eq("status", "ativo")
+      .order("ordem", { referencedTable: "treino_dias", ascending: true })
+      .order("ordem", { referencedTable: "treino_dias.treino_exercicios", ascending: true })
+      .maybeSingle<TreinoCompleto>());
+  }
 
   const { data: exercicios } = await supabase
     .from("exercicios")
@@ -37,5 +55,22 @@ export default async function TreinoPage() {
     );
   }
 
-  return <TreinoView treino={treino} exerciciosDisponiveis={exercicios ?? []} />;
+  // Nomes das alternativas vêm do mesmo `exercicios` já buscado acima pro
+  // seletor de troca de exercício — evita um join aninhado a mais na query.
+  const nomesPorId = new Map((exercicios ?? []).map((e) => [e.id, e.nome]));
+  const treinoComNomes: TreinoCompleto = {
+    ...treino,
+    treino_dias: treino.treino_dias.map((d) => ({
+      ...d,
+      treino_exercicios: d.treino_exercicios.map((te) => ({
+        ...te,
+        alternativas: te.alternativas.map((a) => ({
+          exercicio_id: a.exercicio_id,
+          nome: nomesPorId.get(a.exercicio_id) ?? "Exercício",
+        })),
+      })),
+    })),
+  };
+
+  return <TreinoView treino={treinoComNomes} exerciciosDisponiveis={exercicios ?? []} />;
 }

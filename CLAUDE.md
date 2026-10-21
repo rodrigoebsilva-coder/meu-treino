@@ -319,6 +319,21 @@ treino PPL inicial).
   bootstrap do primeiro admin rodar sem travar nele mesmo; uma chamada de usuário real
   sempre tem `auth.uid()` preenchido, então isso não abre brecha pra ninguém se
   autopromover pela API.
+- **Smart Swap (alternativas de exercício) é regra determinística, não pela IA** —
+  mesmo raciocínio do mesociclo: `escolherAlternativas` (`lib/treino/alternativas.ts`)
+  filtra `exercicios` por mesmo `grupo_muscular` e `equipamento` diferente, sem tocar
+  no contrato JSON da IA. Calculado (2 por exercício) já na aprovação do plano
+  (`aprovarTreino` chama `gerarAlternativasParaTreino`), com um backfill/rede de
+  segurança em `treino/page.tsx` (roda só se faltar alguma — barato depois da
+  primeira vez) pra cobrir treinos de antes dessa feature e exercícios adicionados
+  manualmente.
+- **Troca de exercício ("aparelho ocupado?") vale só pra sessão do dia, nunca edita
+  `treino_exercicios`** — decisão explícita do usuário: o plano continua com o
+  exercício original pras próximas vezes que o dia repetir. `sessao_series` ganhou
+  `exercicio_realizado_id` (nullable — null é o caso comum, "fez o planejado") pra
+  guardar o que foi feito de fato, separado do que estava no plano. O estado de qual
+  alternativa está em uso fica só na memória do componente de execução
+  (`execucao-client.tsx`), nunca persistido fora da série em si.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
@@ -347,6 +362,8 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
 12. ✅ Multiusuário: cargo (admin/professor/aluno) por conta, dados de cadastro
     (nome/data de nascimento/telefone), medidas corporais + IMC/TMB na anamnese,
     cards de treino colapsáveis
+13. ✅ Smart Swap: alternativas de exercício (aparelho ocupado) prontas desde a
+    elaboração do plano, troca só vale pra sessão do dia
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 

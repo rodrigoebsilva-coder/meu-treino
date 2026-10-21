@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { TreinoGeradoSchema, type TreinoGerado, type TipoAcao } from "@/lib/ai/schemas";
 import type { ProvedorIA } from "@/lib/ai/provider";
+import { gerarAlternativasParaTreino } from "@/lib/treino/alternativas";
 
 export type GerarState = {
   erro: string | null;
@@ -150,6 +151,10 @@ export async function aprovarTreino(
       }
     }
   }
+
+  // Smart Swap: alternativas determinísticas (não pela IA), geradas já na
+  // aprovação do plano, pra ficarem prontas assim que o treino entra em uso.
+  await gerarAlternativasParaTreino(supabase, novoTreino.id);
 
   revalidatePath("/treino");
   revalidatePath("/");

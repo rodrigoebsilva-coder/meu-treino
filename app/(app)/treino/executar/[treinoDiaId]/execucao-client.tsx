@@ -15,6 +15,7 @@ import { useRestTimer } from "./use-rest-timer";
 import { RestTimerOverlay } from "./rest-timer-overlay";
 import { CheckinDialog, type CheckinValores } from "./checkin-dialog";
 import { ExercicioVideoButton } from "../../exercicio-video-button";
+import { TrocaExercicioButton } from "./troca-exercicio-button";
 
 type Sugestao = { cargaRealKg: number | null; repeticoesReal: number | null };
 type ValoresSerie = { carga: string; reps: string; rpe: string };
@@ -34,6 +35,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
   const [elapsed, setElapsed] = useState(0);
   const [dicaCasaAberta, setDicaCasaAberta] = useState<string | null>(null);
   const [checkinPendente, setCheckinPendente] = useState(false);
+  const [substituicoes, setSubstituicoes] = useState<Record<string, string>>({});
   const descanso = useRestTimer();
 
   async function criarSessao(checkin: CheckinValores) {
@@ -162,6 +164,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
       rpe: v?.rpe ? Number(v.rpe) : null,
       concluidaEm: new Date().toISOString(),
       sincronizada: false,
+      exercicioRealizadoId: substituicoes[treinoExercicioId] ?? null,
     };
     await db.seriesLocais.add(serie);
     setConcluidas((prev) => ({
@@ -232,14 +235,34 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
       </div>
 
       {dia.treino_exercicios.map((ex) => {
+        const nomeOriginal = ex.exercicio?.nome ?? ex.nome_exercicio_sugerido ?? "";
+        const substitutoId = substituicoes[ex.id] ?? null;
+        const substituto = substitutoId ? ex.alternativas.find((a) => a.exercicio_id === substitutoId) : null;
+        const nomeExibido = substituto?.nome ?? nomeOriginal;
+
         return (
           <Card key={ex.id}>
             <CardHeader className="flex flex-row items-center justify-between gap-2">
-              <CardTitle className="text-base">{ex.exercicio?.nome ?? ex.nome_exercicio_sugerido}</CardTitle>
-              <ExercicioVideoButton
-                nome={ex.exercicio?.nome ?? ex.nome_exercicio_sugerido ?? ""}
-                youtubeUrl={ex.exercicio?.youtube_url ?? null}
-              />
+              <div>
+                <CardTitle className="text-base">{nomeExibido}</CardTitle>
+                {substituto ? <p className="text-xs text-muted-foreground">em vez de {nomeOriginal}</p> : null}
+              </div>
+              <div className="flex items-center gap-1">
+                <TrocaExercicioButton
+                  nomeOriginal={nomeOriginal}
+                  alternativas={ex.alternativas}
+                  substituicaoAtual={substitutoId}
+                  onEscolher={(exercicioId) =>
+                    setSubstituicoes((prev) => {
+                      const novo = { ...prev };
+                      if (exercicioId) novo[ex.id] = exercicioId;
+                      else delete novo[ex.id];
+                      return novo;
+                    })
+                  }
+                />
+                <ExercicioVideoButton nome={nomeExibido} youtubeUrl={ex.exercicio?.youtube_url ?? null} />
+              </div>
             </CardHeader>
             <CardContent className="flex flex-col gap-2">
               {ex.exercicio?.dica_casa ? (

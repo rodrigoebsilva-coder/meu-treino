@@ -33,6 +33,10 @@ export interface SerieLocal {
   rpe: number | null;
   concluidaEm: string;
   sincronizada: boolean;
+  // Smart Swap (Fase 13): exercício realmente feito, se diferente do
+  // planejado (aparelho ocupado) — null é o caso comum. Não é indexado,
+  // não precisa subir a versão do Dexie.
+  exercicioRealizadoId: string | null;
 }
 
 export const db = new Dexie("meu-treino") as Dexie & {

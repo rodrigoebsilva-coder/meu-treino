@@ -307,6 +307,7 @@ export type Database = {
         Row: {
           carga_real_kg: number | null;
           concluida_em: string;
+          exercicio_realizado_id: string | null;
           id: string;
           numero_serie: number;
           origem_offline: boolean;
@@ -320,6 +321,7 @@ export type Database = {
         Insert: {
           carga_real_kg?: number | null;
           concluida_em?: string;
+          exercicio_realizado_id?: string | null;
           id?: string;
           numero_serie: number;
           origem_offline?: boolean;
@@ -332,6 +334,7 @@ export type Database = {
         Update: {
           carga_real_kg?: number | null;
           concluida_em?: string;
+          exercicio_realizado_id?: string | null;
           id?: string;
           numero_serie?: number;
           origem_offline?: boolean;
@@ -342,6 +345,13 @@ export type Database = {
           user_id?: string;
         };
         Relationships: [
+          {
+            foreignKeyName: "sessao_series_exercicio_realizado_id_fkey";
+            columns: ["exercicio_realizado_id"];
+            isOneToOne: false;
+            referencedRelation: "exercicios";
+            referencedColumns: ["id"];
+          },
           {
             foreignKeyName: "sessao_series_sessao_id_fkey";
             columns: ["sessao_id"];
@@ -438,6 +448,46 @@ export type Database = {
             columns: ["treino_id"];
             isOneToOne: false;
             referencedRelation: "treinos";
+            referencedColumns: ["id"];
+          },
+        ];
+      };
+      treino_exercicio_alternativas: {
+        Row: {
+          exercicio_id: string;
+          id: string;
+          ordem: number;
+          treino_exercicio_id: string;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          exercicio_id: string;
+          id?: string;
+          ordem: number;
+          treino_exercicio_id: string;
+          user_id?: string;
+        };
+        Update: {
+          exercicio_id?: string;
+          id?: string;
+          ordem?: number;
+          treino_exercicio_id?: string;
+          user_id?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: "treino_exercicio_alternativas_exercicio_id_fkey";
+            columns: ["exercicio_id"];
+            isOneToOne: false;
+            referencedRelation: "exercicios";
+            referencedColumns: ["id"];
+          },
+          {
+            foreignKeyName: "treino_exercicio_alternativas_treino_exercicio_id_fkey";
+            columns: ["treino_exercicio_id"];
+            isOneToOne: false;
+            referencedRelation: "treino_exercicios";
             referencedColumns: ["id"];
           },
         ];

@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ArrowUp, ArrowDown, Pencil, Trash2 } from "lucide-react";
+import { ArrowUp, ArrowDown, Pencil, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -19,6 +19,7 @@ export function TreinoDiaCard({
 }) {
   const [editando, setEditando] = useState<TreinoExercicioComDados | null>(null);
   const [erro, setErro] = useState<string | null>(null);
+  const [aberto, setAberto] = useState(false);
 
   async function mover(exercicioId: string, direcao: "cima" | "baixo") {
     const res = await reordenarExercicio(dia.id, exercicioId, direcao);
@@ -33,22 +34,35 @@ export function TreinoDiaCard({
   return (
     <Card>
       <CardHeader className="flex flex-row items-start justify-between gap-2">
-        <div>
-          <CardTitle>{dia.nome}</CardTitle>
-          <div className="mt-1 flex flex-wrap gap-1">
+        <button
+          type="button"
+          className="flex flex-1 flex-col items-start gap-1 text-left"
+          onClick={() => setAberto((a) => !a)}
+          aria-expanded={aberto}
+        >
+          <span className="flex items-center gap-1.5">
+            <CardTitle>{dia.nome}</CardTitle>
+            {aberto ? (
+              <ChevronUp className="size-4 text-muted-foreground" />
+            ) : (
+              <ChevronDown className="size-4 text-muted-foreground" />
+            )}
+          </span>
+          <div className="flex flex-wrap gap-1">
             {dia.grupos_musculares.map((g) => (
               <Badge key={g} variant="outline">
                 {g}
               </Badge>
             ))}
           </div>
-        </div>
+        </button>
         <Button render={<Link href={`/treino/executar/${dia.id}`}>Iniciar</Link>} nativeButton={false} />
       </CardHeader>
-      <CardContent className="flex flex-col gap-2">
-        {erro ? <p className="text-sm text-destructive">{erro}</p> : null}
+      {aberto ? (
+        <CardContent className="flex flex-col gap-2">
+          {erro ? <p className="text-sm text-destructive">{erro}</p> : null}
 
-        {dia.treino_exercicios.map((ex, i) => (
+          {dia.treino_exercicios.map((ex, i) => (
           <div key={ex.id} className="flex items-center justify-between gap-2 rounded-md border p-2">
             <div className="flex flex-col">
               <span className="font-medium">{ex.exercicio?.nome ?? ex.nome_exercicio_sugerido}</span>
@@ -84,8 +98,9 @@ export function TreinoDiaCard({
               </Button>
             </div>
           </div>
-        ))}
-      </CardContent>
+          ))}
+        </CardContent>
+      ) : null}
 
       {editando ? (
         <ExercicioEditSheet

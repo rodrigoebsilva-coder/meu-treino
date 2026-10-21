@@ -12,6 +12,13 @@ export const AnamneseSchema = z.object({
   observacoes: z.string().trim().max(2000).optional(),
   meta_peso_kg: z.coerce.number().min(30).max(300).optional(),
   meta_prazo: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, "Data inválida").optional(),
+  sexo: z.enum(["masculino", "feminino"]).optional(),
+  cintura_cm: z.coerce.number().min(0).max(300).optional(),
+  quadril_cm: z.coerce.number().min(0).max(300).optional(),
+  peito_cm: z.coerce.number().min(0).max(300).optional(),
+  braco_cm: z.coerce.number().min(0).max(300).optional(),
+  coxa_cm: z.coerce.number().min(0).max(300).optional(),
+  pescoco_cm: z.coerce.number().min(0).max(300).optional(),
 });
 
 export type AnamneseInput = z.infer<typeof AnamneseSchema>;
@@ -26,4 +33,9 @@ export const LOCAL_TREINO_LABEL: Record<AnamneseInput["local_treino"], string> =
   academia: "Academia",
   casa: "Casa",
   hibrido: "Híbrido",
+};
+
+export const SEXO_LABEL: Record<"masculino" | "feminino", string> = {
+  masculino: "Masculino",
+  feminino: "Feminino",
 };

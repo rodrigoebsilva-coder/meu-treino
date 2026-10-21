@@ -273,6 +273,32 @@ treino PPL inicial).
   `anamneses` em nenhum outro fluxo. "Apagar tudo" cobre anamnese/treinos/sessões/
   medidas/fotos/exercícios próprios; **não mexe em `config_ia` nem nas chaves de IA
   no Vault** — é reset de dado de treino/saúde, não de conta.
+- **`perfis` (cargo admin/professor/aluno) é só um rótulo, sem RLS cruzada** — pedido
+  explícito do usuário antes de implementar (ver pergunta de escopo na Fase 12 do
+  plano). "Professor" não vê/edita dado de aluno nenhum; todas as outras tabelas
+  continuam com RLS "dono vê só o que é dele", sem alteração. Contas continuam
+  criadas à mão no dashboard do Supabase — o app só tem uma tela de admin pra
+  **atribuir cargo** a quem já existe, não pra criar usuário.
+- **Função `SECURITY DEFINER` pra quebrar recursão de RLS "é admin?"**: uma policy de
+  `perfis` que faz `exists (select 1 from perfis where ... cargo = 'admin')` direto
+  recursiona infinitamente (a subquery dispara a mesma policy de novo, que dispara de
+  novo...) — erro real, encontrado testando ("infinite recursion detected in policy").
+  A correção é sempre colocar esse tipo de checagem autorreferente numa função
+  `security definer` (`sou_admin()`), nunca inline na policy.
+- **Trigger em `auth.users` cria a linha de `perfis` automaticamente** no insert
+  (`criar_perfil_novo_usuario`, cargo default `'aluno'`) — não existia nenhum trigger
+  ali antes. O bootstrap do primeiro admin (por e-mail, `rodrigoebsilva@gmail.com`)
+  roda dentro da migration 0014 **e também** num seed novo
+  (`supabase/seeds/05_admin_dev.sql`) — mesma pegadinha de migration-antes-de-seed já
+  documentada pra `dica_casa`: o usuário dev só existe depois que
+  `02_usuario_dev.sql` roda, então o bootstrap da migration sozinho não encontra
+  ninguém pra promover em ambiente local (funciona direto em produção, onde o usuário
+  real já existe antes do `db push`).
+- **O trigger que protege a troca de cargo deixa passar quando `auth.uid()` é nulo**
+  (contexto de migration/seed/service role, sem JWT de usuário) — é o que permite o
+  bootstrap do primeiro admin rodar sem travar nele mesmo; uma chamada de usuário real
+  sempre tem `auth.uid()` preenchido, então isso não abre brecha pra ninguém se
+  autopromover pela API.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
@@ -298,6 +324,9 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
 11. ✅ Mesociclo: periodização configurável em semanas, calendário prospectivo,
     aviso + CTA de regeneração do plano ao fim do ciclo (mais estrutural, fica por
     último)
+12. ✅ Multiusuário: cargo (admin/professor/aluno) por conta, dados de cadastro
+    (nome/data de nascimento/telefone), medidas corporais + IMC/TMB na anamnese,
+    cards de treino colapsáveis
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 

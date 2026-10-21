@@ -3,9 +3,19 @@ import { createClient } from "@/lib/supabase/server";
 import { NIVEL_LABEL, LOCAL_TREINO_LABEL, type AnamneseInput } from "@/lib/perfil/schema";
 import { AnamneseForm } from "./anamnese-form";
 import { MetaRealismo } from "./meta-realismo";
+import { DadosForm } from "./dados-form";
+import { Metricas } from "./metricas";
 
 export default async function PerfilPage() {
   const supabase = await createClient();
+
+  const { data: userData } = await supabase.auth.getUser();
+
+  const { data: perfil } = await supabase
+    .from("perfis")
+    .select("nome, data_nascimento, telefone, email, cargo")
+    .eq("user_id", userData.user!.id)
+    .single();
 
   const { data: atual } = await supabase
     .from("anamnese_atual")
@@ -41,6 +51,23 @@ export default async function PerfilPage() {
         .
       </p>
 
+      {perfil ? (
+        <Card>
+          <CardHeader>
+            <CardTitle>Meus dados 🪪</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <DadosForm
+              nome={perfil.nome}
+              dataNascimento={perfil.data_nascimento}
+              telefone={perfil.telefone}
+              email={perfil.email}
+              cargo={perfil.cargo}
+            />
+          </CardContent>
+        </Card>
+      ) : null}
+
       <Card>
         <CardHeader>
           <CardTitle>
@@ -51,6 +78,10 @@ export default async function PerfilPage() {
           <AnamneseForm anamnese={atual ?? null} />
         </CardContent>
       </Card>
+
+      {atual ? (
+        <Metricas pesoKg={atual.peso_inicial_kg} alturaCm={atual.altura_cm} idade={atual.idade} sexo={atual.sexo ?? null} />
+      ) : null}
 
       {atual?.meta_peso_kg && atual?.meta_prazo && pesoAtualKg ? (
         <MetaRealismo pesoAtualKg={pesoAtualKg} pesoAlvoKg={atual.meta_peso_kg} metaPrazo={atual.meta_prazo} />

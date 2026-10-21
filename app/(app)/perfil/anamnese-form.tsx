@@ -13,7 +13,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { salvarAnamnese, type SalvarAnamneseState } from "./actions";
-import { NIVEL_LABEL, LOCAL_TREINO_LABEL, type AnamneseInput } from "@/lib/perfil/schema";
+import { NIVEL_LABEL, LOCAL_TREINO_LABEL, SEXO_LABEL, type AnamneseInput } from "@/lib/perfil/schema";
 
 const INITIAL_STATE: SalvarAnamneseState = { error: null, success: false };
 
@@ -33,16 +33,63 @@ export function AnamneseForm({ anamnese }: { anamnese: AnamneseInput | null }) {
         </div>
       </div>
 
-      <div className="flex flex-col gap-2">
-        <Label htmlFor="peso_inicial_kg">Peso (kg)</Label>
-        <Input
-          id="peso_inicial_kg"
-          name="peso_inicial_kg"
-          type="number"
-          step="0.1"
-          defaultValue={anamnese?.peso_inicial_kg}
-          required
-        />
+      <div className="grid grid-cols-2 gap-4">
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="peso_inicial_kg">Peso (kg)</Label>
+          <Input
+            id="peso_inicial_kg"
+            name="peso_inicial_kg"
+            type="number"
+            step="0.1"
+            defaultValue={anamnese?.peso_inicial_kg}
+            required
+          />
+        </div>
+        <div className="flex flex-col gap-2">
+          <Label htmlFor="sexo">Sexo biológico (opcional)</Label>
+          <Select name="sexo" defaultValue={anamnese?.sexo ?? undefined}>
+            <SelectTrigger id="sexo" className="w-full">
+              <SelectValue>{(valor: "masculino" | "feminino") => SEXO_LABEL[valor]}</SelectValue>
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(SEXO_LABEL).map(([valor, label]) => (
+                <SelectItem key={valor} value={valor}>
+                  {label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-3 rounded-lg border border-border p-3">
+        <span className="text-sm font-medium">Medidas corporais (opcional)</span>
+        <div className="grid grid-cols-3 gap-3">
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="cintura_cm">Cintura (cm)</Label>
+            <Input id="cintura_cm" name="cintura_cm" type="number" step="0.1" defaultValue={anamnese?.cintura_cm ?? ""} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="quadril_cm">Quadril (cm)</Label>
+            <Input id="quadril_cm" name="quadril_cm" type="number" step="0.1" defaultValue={anamnese?.quadril_cm ?? ""} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="peito_cm">Peito (cm)</Label>
+            <Input id="peito_cm" name="peito_cm" type="number" step="0.1" defaultValue={anamnese?.peito_cm ?? ""} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="braco_cm">Braço (cm)</Label>
+            <Input id="braco_cm" name="braco_cm" type="number" step="0.1" defaultValue={anamnese?.braco_cm ?? ""} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="coxa_cm">Coxa (cm)</Label>
+            <Input id="coxa_cm" name="coxa_cm" type="number" step="0.1" defaultValue={anamnese?.coxa_cm ?? ""} />
+          </div>
+          <div className="flex flex-col gap-2">
+            <Label htmlFor="pescoco_cm">Pescoço (cm)</Label>
+            <Input id="pescoco_cm" name="pescoco_cm" type="number" step="0.1" defaultValue={anamnese?.pescoco_cm ?? ""} />
+          </div>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2">

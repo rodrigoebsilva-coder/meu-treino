@@ -26,6 +26,9 @@ export type Database = {
       anamneses: {
         Row: {
           altura_cm: number;
+          braco_cm: number | null;
+          cintura_cm: number | null;
+          coxa_cm: number | null;
           criado_em: string;
           dias_disponiveis: number;
           id: string;
@@ -37,13 +40,20 @@ export type Database = {
           nivel: string;
           objetivo: string;
           observacoes: string | null;
+          peito_cm: number | null;
+          pescoco_cm: number | null;
           peso_inicial_kg: number;
+          quadril_cm: number | null;
+          sexo: string | null;
           user_id: string;
           versao: number;
         };
         ComputedFields: never;
         Insert: {
           altura_cm: number;
+          braco_cm?: number | null;
+          cintura_cm?: number | null;
+          coxa_cm?: number | null;
           criado_em?: string;
           dias_disponiveis: number;
           id?: string;
@@ -55,12 +65,19 @@ export type Database = {
           nivel: string;
           objetivo: string;
           observacoes?: string | null;
+          peito_cm?: number | null;
+          pescoco_cm?: number | null;
           peso_inicial_kg: number;
+          quadril_cm?: number | null;
+          sexo?: string | null;
           user_id?: string;
           versao: number;
         };
         Update: {
           altura_cm?: number;
+          braco_cm?: number | null;
+          cintura_cm?: number | null;
+          coxa_cm?: number | null;
           criado_em?: string;
           dias_disponiveis?: number;
           id?: string;
@@ -72,7 +89,11 @@ export type Database = {
           nivel?: string;
           objetivo?: string;
           observacoes?: string | null;
+          peito_cm?: number | null;
+          pescoco_cm?: number | null;
           peso_inicial_kg?: number;
+          quadril_cm?: number | null;
+          sexo?: string | null;
           user_id?: string;
           versao?: number;
         };
@@ -247,6 +268,37 @@ export type Database = {
           peito_cm?: number | null;
           peso_kg?: number | null;
           registrado_em?: string;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
+      perfis: {
+        Row: {
+          cargo: Database["public"]["Enums"]["cargo_usuario"];
+          criado_em: string;
+          data_nascimento: string | null;
+          email: string;
+          nome: string | null;
+          telefone: string | null;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          cargo?: Database["public"]["Enums"]["cargo_usuario"];
+          criado_em?: string;
+          data_nascimento?: string | null;
+          email: string;
+          nome?: string | null;
+          telefone?: string | null;
+          user_id: string;
+        };
+        Update: {
+          cargo?: Database["public"]["Enums"]["cargo_usuario"];
+          criado_em?: string;
+          data_nascimento?: string | null;
+          email?: string;
+          nome?: string | null;
+          telefone?: string | null;
           user_id?: string;
         };
         Relationships: [];
@@ -507,6 +559,9 @@ export type Database = {
       anamnese_atual: {
         Row: {
           altura_cm: number | null;
+          braco_cm: number | null;
+          cintura_cm: number | null;
+          coxa_cm: number | null;
           criado_em: string | null;
           dias_disponiveis: number | null;
           id: string | null;
@@ -518,7 +573,11 @@ export type Database = {
           nivel: string | null;
           objetivo: string | null;
           observacoes: string | null;
+          peito_cm: number | null;
+          pescoco_cm: number | null;
           peso_inicial_kg: number | null;
+          quadril_cm: number | null;
+          sexo: string | null;
           user_id: string | null;
           versao: number | null;
         };
@@ -528,6 +587,7 @@ export type Database = {
     };
     Functions: {
       atualizar_dica_casa: { Args: { p_dica: string; p_exercicio_id: string }; Returns: undefined };
+      sou_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
       vault_get_ai_key: {
         Args: { p_provedor: Database["public"]["Enums"]["provedor_ia"] };
         Returns: string;
@@ -538,6 +598,7 @@ export type Database = {
       };
     };
     Enums: {
+      cargo_usuario: "admin" | "professor" | "aluno";
       metodo_serie: "normal" | "biset" | "drop_set" | "rest_pause" | "piramide";
       origem_exercicio: "base" | "usuario";
       origem_treino: "manual" | "claude" | "gemini";
@@ -661,6 +722,7 @@ export const Constants = {
   },
   public: {
     Enums: {
+      cargo_usuario: ["admin", "professor", "aluno"],
       metodo_serie: ["normal", "biset", "drop_set", "rest_pause", "piramide"],
       origem_exercicio: ["base", "usuario"],
       origem_treino: ["manual", "claude", "gemini"],

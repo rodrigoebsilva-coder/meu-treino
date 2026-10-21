@@ -37,7 +37,7 @@ export function TreinoDiaCard({
           <CardTitle>{dia.nome}</CardTitle>
           <div className="mt-1 flex flex-wrap gap-1">
             {dia.grupos_musculares.map((g) => (
-              <Badge key={g} variant="secondary">
+              <Badge key={g} variant="outline">
                 {g}
               </Badge>
             ))}

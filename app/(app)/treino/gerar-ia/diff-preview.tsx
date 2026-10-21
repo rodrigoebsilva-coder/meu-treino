@@ -53,7 +53,7 @@ export function DiffPreview({
               <span className="text-sm font-medium">O que muda</span>
               {treino.mudancas.map((m, i) => (
                 <div key={i} className="flex items-start gap-2 text-sm">
-                  <Badge variant="secondary" className="shrink-0">
+                  <Badge variant="outline" className="shrink-0">
                     {MUDANCA_LABEL[m.tipo]}
                   </Badge>
                   <span className="text-muted-foreground">{m.descricao}</span>

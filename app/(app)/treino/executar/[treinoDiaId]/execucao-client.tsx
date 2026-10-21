@@ -293,7 +293,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
       </Button>
 
       {descanso.ativo ? (
-        <div className="sticky bottom-20 z-10 flex items-center justify-between rounded-lg bg-primary px-4 py-3 text-primary-foreground shadow-lg">
+        <div className="sticky bottom-20 z-10 flex items-center justify-between rounded-full bg-primary px-4 py-3 text-primary-foreground">
           <span>Descansando...</span>
           <div className="flex items-center gap-3">
             <span className="font-mono text-lg">

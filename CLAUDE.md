@@ -16,6 +16,28 @@ repo — se precisar, releia o plano aprovado antes de alterar schema/Edge Funct
 - Zod 4 (`z.toJSONSchema()` nativo — não precisa de `zod-to-json-schema`).
 - Recharts (gráficos), Dexie (IndexedDB para fila offline).
 
+## Identidade visual
+
+Paleta, tipografia e princípios flat/pill vêm do doc de identidade visual da SolIA
+Labs (empresa do usuário) — não do prompt original. Tudo em `app/globals.css`
+(tokens de cor light/dark) + `app/layout.tsx` (fonte). Resumo:
+- Fundo branco/`#FAFAFB`, texto `#111827`, acento azul `#3B82F6` (hover
+  `#1D4ED8`), secundários violeta `#7C5CFF` e ciano `#0E9AAE` — usados nos
+  `--chart-*`. Modo escuro é extrapolado da mesma paleta (o doc da SolIA não
+  especifica um dark theme completo).
+- **Sem sombra, sem gradiente, nenhuma exceção**: `Card`/`Dialog`/`Select`/`Sheet`
+  usam `border border-border` no lugar de `shadow-*`/`ring-*`. Qualquer componente
+  shadcn novo que adicionar via `npx shadcn add` provavelmente vem com `shadow-*`
+  por padrão — tirar na hora.
+- **Botões são pill** (`rounded-full`, não `rounded-lg`) — mudança no
+  `buttonVariants` base de `components/ui/button.tsx`, não só uma classe num botão
+  específico.
+- Títulos usam Space Grotesk (`font-heading`, carregada em `app/layout.tsx`);
+  corpo usa a stack `system-ui`; mono (`font-mono`) é só a stack do sistema
+  (`ui-monospace, Menlo, monospace`), sem Google Font — a SolIA não pede uma fonte
+  mono customizada.
+- Ícones do PWA (`public/icons/*.png`) e `theme_color` usam o azul `#3B82F6`.
+
 ## Como rodar local
 
 ```bash

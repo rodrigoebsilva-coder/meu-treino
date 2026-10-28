@@ -37,6 +37,8 @@ export interface SerieLocal {
   // planejado (aparelho ocupado) — null é o caso comum. Não é indexado,
   // não precisa subir a versão do Dexie.
   exercicioRealizadoId: string | null;
+  // Desmarcada depois de já sincronizada: o sync apaga a linha remota e depois a local.
+  removida?: boolean;
 }
 
 export const db = new Dexie("meu-treino") as Dexie & {

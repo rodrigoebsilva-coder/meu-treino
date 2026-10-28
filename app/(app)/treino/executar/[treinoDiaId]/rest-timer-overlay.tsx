@@ -9,11 +9,13 @@ export function RestTimerOverlay({
   restante,
   duracaoTotal,
   onEstender,
+  onReduzir,
   onPular,
 }: {
   restante: number;
   duracaoTotal: number;
   onEstender: () => void;
+  onReduzir: () => void;
   onPular: () => void;
 }) {
   const progresso = duracaoTotal > 0 ? restante / duracaoTotal : 0;
@@ -46,6 +48,9 @@ export function RestTimerOverlay({
       </div>
 
       <div className="flex items-center gap-3">
+        <Button variant="outline" size="lg" onClick={onReduzir} disabled={restante <= 15}>
+          -15s
+        </Button>
         <Button variant="outline" size="lg" onClick={onEstender}>
           +15s
         </Button>

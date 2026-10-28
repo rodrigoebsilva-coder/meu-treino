@@ -9,7 +9,8 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 import { db, type SerieLocal } from "@/lib/offline/db";
 import { createClient } from "@/lib/supabase/client";
-import { sincronizar } from "@/lib/offline/sync";
+import { sincronizar, sessaoAbandonada } from "@/lib/offline/sync";
+import { preferenciasTimer } from "@/lib/preferencias/timer";
 import { type TreinoDiaCompleto } from "@/lib/treino/types";
 import { useRestTimer } from "./use-rest-timer";
 import { RestTimerOverlay } from "./rest-timer-overlay";
@@ -18,6 +19,7 @@ import { ExercicioVideoButton } from "../../exercicio-video-button";
 import { TrocaExercicioButton } from "./troca-exercicio-button";
 
 type Sugestao = { cargaRealKg: number | null; repeticoesReal: number | null };
+type Concluida = Sugestao & { idLocal: string; rpe: number | null };
 type ValoresSerie = { carga: string; reps: string; rpe: string };
 
 function chaveSerie(treinoExercicioId: string, numeroSerie: number) {
@@ -28,7 +30,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
   const [dia, setDia] = useState<TreinoDiaCompleto | null | undefined>(undefined);
   const [sessaoIdLocal, setSessaoIdLocal] = useState<string | null>(null);
   const [iniciadaEm, setIniciadaEm] = useState<string | null>(null);
-  const [concluidas, setConcluidas] = useState<Record<string, Sugestao>>({});
+  const [concluidas, setConcluidas] = useState<Record<string, Concluida>>({});
   const [sugestoes, setSugestoes] = useState<Record<string, Sugestao>>({});
   const [valores, setValores] = useState<Record<string, ValoresSerie>>({});
   const [finalizada, setFinalizada] = useState(false);
@@ -72,7 +74,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
       const existente = await db.sessoesLocais
         .where("treinoDiaId")
         .equals(treinoDiaId)
-        .filter((s) => !s.finalizadaEm)
+        .filter((s) => !s.finalizadaEm && !sessaoAbandonada(s))
         .first();
 
       if (existente) {
@@ -96,12 +98,14 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
     if (!sessaoIdLocal) return;
 
     (async () => {
-      const series = await db.seriesLocais.where("sessaoIdLocal").equals(sessaoIdLocal).toArray();
-      const mapa: Record<string, Sugestao> = {};
+      const series = await db.seriesLocais.where("sessaoIdLocal").equals(sessaoIdLocal).filter((x) => !x.removida).toArray();
+      const mapa: Record<string, Concluida> = {};
       for (const s of series) {
         mapa[chaveSerie(s.treinoExercicioId, s.numeroSerie)] = {
+          idLocal: s.idLocal,
           cargaRealKg: s.cargaRealKg,
           repeticoesReal: s.repeticoesReal,
+          rpe: s.rpe,
         };
       }
       setConcluidas(mapa);
@@ -150,6 +154,56 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
     setValores((prev) => ({ ...prev, [chave]: { ...prev[chave], [campo]: valor } }));
   }
 
+  // Carga e reps digitadas numa série vão para as seguintes (e para as anteriores ainda vazias).
+  function atualizarValorExercicio(exId: string, totalSeries: number, numeroSerie: number, campo: "carga" | "reps", valor: string) {
+    setValores((prev) => {
+      const novo = { ...prev };
+      for (let n = 1; n <= totalSeries; n++) {
+        const k = chaveSerie(exId, n);
+        if (concluidas[k]) continue;
+        const vazio = !novo[k]?.[campo];
+        if (n >= numeroSerie || vazio) {
+          novo[k] = { ...(novo[k] ?? { carga: "", reps: "", rpe: "" }), [campo]: valor };
+        }
+      }
+      return novo;
+    });
+  }
+
+  // Edita uma série já concluída (carga, reps ou RPE) e reenvia na próxima sincronização.
+  async function editarConcluida(chave: string, campo: "carga" | "reps" | "rpe", texto: string) {
+    const feita = concluidas[chave];
+    if (!feita) return;
+    const numero = texto.trim() === "" ? null : Number(texto);
+    const mudanca =
+      campo === "carga" ? { cargaRealKg: numero } : campo === "reps" ? { repeticoesReal: numero } : { rpe: numero };
+    setConcluidas((prev) => ({ ...prev, [chave]: { ...prev[chave], ...mudanca } }));
+    await db.seriesLocais.update(feita.idLocal, { ...mudanca, sincronizada: false });
+  }
+
+  async function desmarcarSerie(chave: string) {
+    const feita = concluidas[chave];
+    if (!feita) return;
+    const local = await db.seriesLocais.get(feita.idLocal);
+    if (local?.sincronizada) await db.seriesLocais.update(feita.idLocal, { removida: true, sincronizada: false });
+    else await db.seriesLocais.delete(feita.idLocal);
+    setConcluidas((prev) => {
+      const novo = { ...prev };
+      delete novo[chave];
+      return novo;
+    });
+    setValores((prev) => ({
+      ...prev,
+      [chave]: {
+        carga: feita.cargaRealKg?.toString() ?? "",
+        reps: feita.repeticoesReal?.toString() ?? "",
+        rpe: feita.rpe?.toString() ?? "",
+      },
+    }));
+    descanso.cancelar();
+    void sincronizar();
+  }
+
   async function concluirSerie(treinoExercicioId: string, numeroSerie: number, descansoSegundos: number) {
     if (!sessaoIdLocal) return;
     const chave = chaveSerie(treinoExercicioId, numeroSerie);
@@ -182,9 +236,9 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
     await db.seriesLocais.add(serie);
     setConcluidas((prev) => ({
       ...prev,
-      [chave]: { cargaRealKg: serie.cargaRealKg, repeticoesReal: serie.repeticoesReal },
+      [chave]: { idLocal: serie.idLocal, cargaRealKg: serie.cargaRealKg, repeticoesReal: serie.repeticoesReal, rpe: serie.rpe },
     }));
-    descanso.iniciar(descansoSegundos);
+    descanso.iniciar(preferenciasTimer.getDescanso() ?? descansoSegundos);
     void sincronizar();
   }
 
@@ -303,9 +357,9 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
                   <div key={chave} className="flex items-center gap-2">
                     <Checkbox
                       checked={!!feita}
-                      disabled={!!feita}
                       onCheckedChange={(marcado) => {
                         if (marcado) void concluirSerie(ex.id, numeroSerie, ex.descanso_segundos);
+                        else void desmarcarSerie(chave);
                       }}
                     />
                     <span className="w-6 text-sm text-muted-foreground">#{numeroSerie}</span>
@@ -313,18 +367,26 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
                       className="w-20"
                       type="number"
                       step="0.5"
-                      placeholder={cargaPadrao || "kg"}
-                      disabled={!!feita}
-                      value={feita ? feita.cargaRealKg?.toString() ?? "" : valorAtual(chave, "carga", "")}
-                      onChange={(e) => atualizarValor(chave, "carga", e.target.value)}
+                      placeholder="kg"
+                      value={feita ? feita.cargaRealKg?.toString() ?? "" : valorAtual(chave, "carga", cargaPadrao)}
+                      onChange={(e) =>
+                        feita
+                          ? void editarConcluida(chave, "carga", e.target.value)
+                          : atualizarValorExercicio(ex.id, ex.series, numeroSerie, "carga", e.target.value)
+                      }
+                      onBlur={() => feita && void sincronizar()}
                     />
                     <Input
                       className="w-16"
                       type="number"
-                      placeholder={repsPadrao || `${ex.repeticoes_min}-${ex.repeticoes_max}`}
-                      disabled={!!feita}
-                      value={feita ? feita.repeticoesReal?.toString() ?? "" : valorAtual(chave, "reps", "")}
-                      onChange={(e) => atualizarValor(chave, "reps", e.target.value)}
+                      placeholder={`${ex.repeticoes_min}-${ex.repeticoes_max}`}
+                      value={feita ? feita.repeticoesReal?.toString() ?? "" : valorAtual(chave, "reps", repsPadrao)}
+                      onChange={(e) =>
+                        feita
+                          ? void editarConcluida(chave, "reps", e.target.value)
+                          : atualizarValorExercicio(ex.id, ex.series, numeroSerie, "reps", e.target.value)
+                      }
+                      onBlur={() => feita && void sincronizar()}
                     />
                     <Input
                       className="w-16"
@@ -332,9 +394,11 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
                       min={1}
                       max={10}
                       placeholder="RPE"
-                      disabled={!!feita}
-                      value={valorAtual(chave, "rpe", "")}
-                      onChange={(e) => atualizarValor(chave, "rpe", e.target.value)}
+                      value={feita ? feita.rpe?.toString() ?? "" : valorAtual(chave, "rpe", "")}
+                      onChange={(e) =>
+                        feita ? void editarConcluida(chave, "rpe", e.target.value) : atualizarValor(chave, "rpe", e.target.value)
+                      }
+                      onBlur={() => feita && void sincronizar()}
                     />
                   </div>
                 );
@@ -353,6 +417,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
           restante={descanso.restante}
           duracaoTotal={descanso.duracaoTotal}
           onEstender={() => descanso.estender(15)}
+          onReduzir={() => descanso.estender(-15)}
           onPular={descanso.cancelar}
         />
       ) : null}

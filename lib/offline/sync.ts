@@ -32,10 +32,44 @@ export async function sincronizar() {
   }
 }
 
+// Sessão iniciada e nunca finalizada vira "abandonada" depois disso: sem séries é cancelada,
+// com séries é encerrada na hora da última série (o cronômetro não fica rodando pra sempre).
+export const LIMITE_SESSAO_ABERTA_MS = 5 * 60 * 60 * 1000;
+
+export function sessaoAbandonada(s: { finalizadaEm: string | null; iniciadaEm: string }) {
+  return !s.finalizadaEm && Date.now() - new Date(s.iniciadaEm).getTime() > LIMITE_SESSAO_ABERTA_MS;
+}
+
+async function resolverSessoesAbandonadas(supabase: ReturnType<typeof createClient>) {
+  const abandonadas = await db.sessoesLocais.filter(sessaoAbandonada).toArray();
+
+  for (const s of abandonadas) {
+    const series = await db.seriesLocais.where("sessaoIdLocal").equals(s.idLocal).filter((x) => !x.removida).toArray();
+
+    if (series.length === 0) {
+      if (s.idRemoto) {
+        const { error } = await supabase.from("sessoes").delete().eq("id", s.idRemoto);
+        if (error) continue;
+      }
+      await db.seriesLocais.where("sessaoIdLocal").equals(s.idLocal).delete();
+      await db.sessoesLocais.delete(s.idLocal);
+      continue;
+    }
+
+    const ultima = series.reduce((a, b) => (a.concluidaEm > b.concluidaEm ? a : b)).concluidaEm;
+    await db.sessoesLocais.update(s.idLocal, {
+      finalizadaEm: ultima,
+      duracaoSegundos: Math.max(0, Math.floor((new Date(ultima).getTime() - new Date(s.iniciadaEm).getTime()) / 1000)),
+      sincronizada: false,
+    });
+  }
+}
+
 async function sincronizarUmaVez() {
   if (typeof navigator !== "undefined" && !navigator.onLine) return;
 
   const supabase = createClient();
+  await resolverSessoesAbandonadas(supabase);
   const sessoes = await db.sessoesLocais.toArray();
 
   for (const sessao of sessoes) {
@@ -83,6 +117,11 @@ async function sincronizarUmaVez() {
       .toArray();
 
     for (const serie of series) {
+      if (serie.removida) {
+        const { error } = await supabase.from("sessao_series").delete().eq("id", serie.idLocal);
+        if (!error) await db.seriesLocais.delete(serie.idLocal);
+        continue;
+      }
       const { error } = await supabase.from("sessao_series").upsert(
         {
           id: serie.idLocal,

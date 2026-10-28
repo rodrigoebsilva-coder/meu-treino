@@ -22,10 +22,13 @@ export default async function UsuariosPage() {
     .select("user_id, email, nome, cargo")
     .order("criado_em", { ascending: true });
 
+  const { data: cotas } = await supabase.from("cota_ia").select("user_id, creditos");
+  const creditosPorUsuario = Object.fromEntries((cotas ?? []).map((c) => [c.user_id, c.creditos]));
+
   return (
     <main className="flex flex-col gap-6 p-6">
       <h1 className="text-2xl font-semibold">Usuários 🛠️</h1>
-      <UsuariosTable usuarios={usuarios ?? []} meuUserId={userData.user.id} />
+      <UsuariosTable usuarios={usuarios ?? []} meuUserId={userData.user.id} creditosPorUsuario={creditosPorUsuario} />
     </main>
   );
 }

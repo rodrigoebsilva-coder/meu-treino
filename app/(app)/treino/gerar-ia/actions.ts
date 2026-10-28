@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { FunctionsHttpError } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase/server";
 import { TreinoGeradoSchema, type TreinoGerado, type TipoAcao } from "@/lib/ai/schemas";
 import type { ProvedorIA } from "@/lib/ai/provider";
@@ -21,12 +22,13 @@ export async function gerarTreinoIA(_prev: GerarState, formData: FormData): Prom
   const pedidoUsuario = String(formData.get("pedidoUsuario") ?? "");
   const propostaAnteriorRaw = formData.get("propostaAnterior");
 
-  if (!provedor || !modelo || !tipoAcao) {
-    return { ...INICIAL, erro: "Selecione provedor, modelo e tipo de ação." };
+  if (!tipoAcao) {
+    return { ...INICIAL, erro: "Selecione o tipo de ação." };
   }
 
   const supabase = await createClient();
-  const body: Record<string, unknown> = { provedor, modelo, tipoAcao, pedidoUsuario };
+  // Usuário comum não escolhe provedor/modelo: a função usa os do admin.
+  const body: Record<string, unknown> = { provedor: provedor || undefined, modelo: modelo || undefined, tipoAcao, pedidoUsuario };
   if (typeof propostaAnteriorRaw === "string" && propostaAnteriorRaw) {
     body.propostaAnterior = JSON.parse(propostaAnteriorRaw);
   }
@@ -34,7 +36,8 @@ export async function gerarTreinoIA(_prev: GerarState, formData: FormData): Prom
   const { data, error } = await supabase.functions.invoke("gerar-treino", { body });
 
   if (error) {
-    return { ...INICIAL, erro: "Não foi possível gerar o treino. Verifique a chave em Configurações → IA e tente de novo." };
+    const detalhe = error instanceof FunctionsHttpError ? await error.context.json().catch(() => null) : null;
+    return { ...INICIAL, erro: detalhe?.error ?? "Não foi possível gerar o treino. Tente de novo." };
   }
 
   const parsed = TreinoGeradoSchema.safeParse(data?.treino);
@@ -79,6 +82,9 @@ export async function aprovarTreino(
     return { erro: "Não foi possível arquivar o treino anterior." };
   }
 
+  // Provedor real vem da geração gravada (com a chave compartilhada, o cliente não sabe qual foi).
+  const { data: geracao } = await supabase.from("geracoes_ia").select("provedor").eq("id", geracaoId).single();
+
   const duracaoSemanas = duracaoSemanasNovoCiclo ?? treinoAnterior?.duracao_semanas ?? 12;
   const criadoEm = duracaoSemanasNovoCiclo != null || !treinoAnterior ? new Date().toISOString() : treinoAnterior.criado_em;
 
@@ -87,7 +93,7 @@ export async function aprovarTreino(
     .insert({
       nome_ciclo: treino.nome_ciclo,
       status: "ativo",
-      origem: provedor,
+      origem: geracao?.provedor ?? provedor,
       geracao_ia_id: geracaoId,
       justificativa_ia: treino.justificativa,
       duracao_semanas: duracaoSemanas,

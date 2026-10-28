@@ -335,6 +335,19 @@ treino PPL inicial).
   alternativa está em uso fica só na memória do componente de execução
   (`execucao-client.tsx`), nunca persistido fora da série em si.
 
+- **Chave de IA compartilhada + cota de gerações** (migration 0018): usuário que não é
+  admin não configura chave — a Edge Function `gerar-treino` usa provedor/modelo/chave
+  do primeiro admin (`vault_get_chave_compartilhada`, só `service_role`) e ignora o que
+  vier no corpo da requisição. Cada usuário comum tem 1 geração (`cota_ia.creditos`;
+  sem linha = 1); o admin libera +1 por usuário em `/configuracoes/usuarios`
+  (`liberar_geracao`, checa `sou_admin()`). Consumo/devolução (`consumir_geracao`/
+  `devolver_geracao`) são `service_role`-only e chamados pela função depois de validar o
+  JWT, nunca pelo cliente — senão o usuário se daria créditos. Crédito é consumido antes
+  da chamada à IA e devolvido se a geração falhar. "Pedir ajuste" (2ª chamada à IA) fica
+  oculto pra quem usa a chave compartilhada; o ajuste é manual em `/treino`. Admin usa a
+  própria chave e é ilimitado. `aprovarTreino` lê o provedor de `geracoes_ia` (o cliente
+  não sabe qual foi usado).
+
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
 0. ✅ Plano (schema, Edge Function, JSON da IA)
@@ -370,6 +383,8 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
     x-goog-api-key na Gemini, validação de prefixo em fotos, fuso de Brasília no
     Streak e catálogo de exercícios + check-in no contexto da IA (ver detalhes e
     próximos passos em [HANDOFF-FASE-14.md](HANDOFF-FASE-14.md))
+
+15. ✅ Chave de IA compartilhada (do admin) + 1 geração por usuário, liberada pelo admin
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 

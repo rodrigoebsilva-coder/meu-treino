@@ -127,6 +127,25 @@ export type Database = {
         };
         Relationships: [];
       };
+      cota_ia: {
+        Row: {
+          atualizado_em: string;
+          creditos: number;
+          user_id: string;
+        };
+        ComputedFields: never;
+        Insert: {
+          atualizado_em?: string;
+          creditos?: number;
+          user_id: string;
+        };
+        Update: {
+          atualizado_em?: string;
+          creditos?: number;
+          user_id?: string;
+        };
+        Relationships: [];
+      };
       exercicios: {
         Row: {
           criado_em: string;
@@ -637,7 +656,14 @@ export type Database = {
     };
     Functions: {
       atualizar_dica_casa: { Args: { p_dica: string; p_exercicio_id: string }; Returns: undefined };
+      consumir_geracao: { Args: { p_user_id: string }; Returns: boolean };
+      devolver_geracao: { Args: { p_user_id: string }; Returns: undefined };
+      liberar_geracao: { Args: { p_user_id: string }; Returns: undefined };
       sou_admin: { Args: Record<PropertyKey, never>; Returns: boolean };
+      vault_get_chave_compartilhada: {
+        Args: Record<PropertyKey, never>;
+        Returns: { chave: string; modelo: string; provedor: Database["public"]["Enums"]["provedor_ia"] }[];
+      };
       vault_get_ai_key: {
         Args: { p_provedor: Database["public"]["Enums"]["provedor_ia"] };
         Returns: string;

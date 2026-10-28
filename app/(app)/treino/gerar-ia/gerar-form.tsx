@@ -30,6 +30,7 @@ export function GerarForm({
   exerciciosPorId,
   tipoAcaoInicial,
   semanasInicial,
+  chaveCompartilhada,
   onDescartar,
 }: {
   provedorPadrao: ProvedorIA;
@@ -38,6 +39,7 @@ export function GerarForm({
   exerciciosPorId: Record<string, string>;
   tipoAcaoInicial?: TipoAcao;
   semanasInicial?: number;
+  chaveCompartilhada: boolean;
   onDescartar: () => void;
 }) {
   const [tipoAcao, setTipoAcao] = useState<TipoAcao>(tipoAcaoInicial ?? (temTreinoAtivo ? "ajustar" : "novo_ciclo"));
@@ -91,6 +93,7 @@ export function GerarForm({
           setModoAjuste(true);
         }}
         onDescartar={onDescartar}
+        permitirAjuste={!chaveCompartilhada}
         duracaoSemanas={tipoAcao === "novo_ciclo" ? duracaoSemanas : null}
       />
     );
@@ -155,6 +158,12 @@ export function GerarForm({
         />
       </div>
 
+      {chaveCompartilhada ? (
+        <p className="text-sm text-muted-foreground">
+          Você tem uma geração de treino disponível. Depois dela, ajuste o treino manualmente ou peça ao
+          administrador para liberar outra.
+        </p>
+      ) : (
       <div className="grid grid-cols-2 gap-3">
         <div className="flex flex-col gap-2">
           <Label htmlFor="provedor-select">Provedor</Label>
@@ -197,11 +206,12 @@ export function GerarForm({
           </div>
         )}
       </div>
+      )}
 
       {erroModelos ? <p className="text-sm text-destructive">{erroModelos}</p> : null}
       {state.erro ? <p className="text-sm text-destructive">{state.erro}</p> : null}
 
-      <Button type="submit" disabled={gerando || !modelo}>
+      <Button type="submit" disabled={gerando || (!chaveCompartilhada && !modelo)}>
         {gerando ? "Gerando..." : "Gerar"}
       </Button>
     </form>

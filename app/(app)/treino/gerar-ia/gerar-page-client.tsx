@@ -12,6 +12,7 @@ export function GerarPageClient({
   exerciciosPorId,
   tipoAcaoInicial,
   semanasInicial,
+  chaveCompartilhada,
 }: {
   provedorPadrao: ProvedorIA;
   modeloPadrao: string;
@@ -19,6 +20,7 @@ export function GerarPageClient({
   exerciciosPorId: Record<string, string>;
   tipoAcaoInicial?: TipoAcao;
   semanasInicial?: number;
+  chaveCompartilhada: boolean;
 }) {
   // Trocar a `key` remonta o GerarForm do zero — é como "descartar" reseta o
   // useActionState interno dele sem precisar de um método de reset próprio.
@@ -33,6 +35,7 @@ export function GerarPageClient({
       exerciciosPorId={exerciciosPorId}
       tipoAcaoInicial={tipoAcaoInicial}
       semanasInicial={semanasInicial}
+      chaveCompartilhada={chaveCompartilhada}
       onDescartar={() => setGeracao((g) => g + 1)}
     />
   );

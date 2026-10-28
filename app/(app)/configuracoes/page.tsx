@@ -23,7 +23,9 @@ export default async function ConfiguracoesPage() {
 
       <TimerToggles />
 
-      <Button variant="outline" render={<Link href="/configuracoes/ia">IA (Claude/Gemini)</Link>} nativeButton={false} className="w-fit" />
+      {perfil?.cargo === "admin" ? (
+        <Button variant="outline" render={<Link href="/configuracoes/ia">IA (Claude/Gemini)</Link>} nativeButton={false} className="w-fit" />
+      ) : null}
       <Button variant="outline" render={<Link href="/configuracoes/dados">Seus dados</Link>} nativeButton={false} className="w-fit" />
       <Button variant="outline" render={<Link href="/aviso-legal">Aviso legal e médico</Link>} nativeButton={false} className="w-fit" />
       {perfil?.cargo === "admin" ? (

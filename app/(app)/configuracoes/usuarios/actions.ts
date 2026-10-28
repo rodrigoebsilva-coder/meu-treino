@@ -17,3 +17,13 @@ export async function atualizarCargo(userId: string, novoCargo: "admin" | "profe
   revalidatePath("/configuracoes/usuarios");
   return { erro: null };
 }
+
+export async function liberarGeracao(userId: string): Promise<AtualizarCargoState> {
+  const supabase = await createClient();
+  const { error } = await supabase.rpc("liberar_geracao", { p_user_id: userId });
+  if (error) {
+    return { erro: "Não foi possível liberar a geração. Só admin pode fazer isso." };
+  }
+  revalidatePath("/configuracoes/usuarios");
+  return { erro: null };
+}

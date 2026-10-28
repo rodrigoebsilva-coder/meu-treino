@@ -1,8 +1,11 @@
+import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { IaForm } from "./ia-form";
 
 export default async function ConfiguracoesIaPage() {
   const supabase = await createClient();
+  const { data: ehAdmin } = await supabase.rpc("sou_admin");
+  if (!ehAdmin) redirect("/configuracoes");
   const { data: config } = await supabase
     .from("config_ia")
     .select("provedor_padrao, modelo_padrao, claude_key_secret_id, gemini_key_secret_id")

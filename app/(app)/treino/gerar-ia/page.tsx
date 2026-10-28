@@ -16,6 +16,13 @@ export default async function GerarIaPage({
   const semanasInicial = semanas >= 1 && semanas <= 52 ? semanas : undefined;
   const supabase = await createClient();
 
+  const { data: ehAdmin } = await supabase.rpc("sou_admin");
+  const { data: userData } = await supabase.auth.getUser();
+  const { data: cota } = ehAdmin
+    ? { data: null }
+    : await supabase.from("cota_ia").select("creditos").eq("user_id", userData.user?.id ?? "").maybeSingle();
+  const creditos = cota?.creditos ?? 1;
+
   const { data: config } = await supabase
     .from("config_ia")
     .select("provedor_padrao, modelo_padrao")
@@ -27,7 +34,20 @@ export default async function GerarIaPage({
 
   const exerciciosPorId = Object.fromEntries((exercicios ?? []).map((e) => [e.id, e.nome]));
 
-  if (!config?.modelo_padrao) {
+  if (!ehAdmin && creditos <= 0) {
+    return (
+      <main className="flex flex-col gap-4 p-6">
+        <h1 className="text-2xl font-semibold">Gerar treino com IA 🤖</h1>
+        <p className="text-muted-foreground">
+          Você já usou sua geração de treino. Peça ao administrador para liberar outra, ou ajuste o seu treino
+          manualmente.
+        </p>
+        <Button render={<Link href="/treino">Ir para o meu treino</Link>} nativeButton={false} className="w-fit" />
+      </main>
+    );
+  }
+
+  if (ehAdmin && !config?.modelo_padrao) {
     return (
       <main className="flex flex-col gap-4 p-6">
         <h1 className="text-2xl font-semibold">Gerar treino com IA 🤖</h1>
@@ -43,8 +63,9 @@ export default async function GerarIaPage({
     <main className="flex flex-col gap-4 p-6">
       <h1 className="text-2xl font-semibold">Gerar treino com IA 🤖</h1>
       <GerarPageClient
-        provedorPadrao={config.provedor_padrao as ProvedorIA}
-        modeloPadrao={config.modelo_padrao}
+        provedorPadrao={(config?.provedor_padrao ?? "claude") as ProvedorIA}
+        modeloPadrao={config?.modelo_padrao ?? ""}
+        chaveCompartilhada={!ehAdmin}
         temTreinoAtivo={!!treinoAtivo}
         exerciciosPorId={exerciciosPorId}
         tipoAcaoInicial={tipoAcaoInicial}

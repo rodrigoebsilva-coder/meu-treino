@@ -16,6 +16,7 @@ export function DiffPreview({
   exerciciosPorId,
   onAjustar,
   onDescartar,
+  permitirAjuste,
   duracaoSemanas,
 }: {
   treino: TreinoGerado;
@@ -24,6 +25,7 @@ export function DiffPreview({
   exerciciosPorId: Record<string, string>;
   onAjustar: () => void;
   onDescartar: () => void;
+  permitirAjuste: boolean;
   duracaoSemanas: number | null;
 }) {
   const router = useRouter();
@@ -94,9 +96,11 @@ export function DiffPreview({
         <Button onClick={aprovar} disabled={aprovando}>
           {aprovando ? "Aplicando..." : "Aprovar"}
         </Button>
-        <Button variant="outline" onClick={onAjustar} disabled={aprovando}>
-          Pedir ajuste
-        </Button>
+        {permitirAjuste ? (
+          <Button variant="outline" onClick={onAjustar} disabled={aprovando}>
+            Pedir ajuste
+          </Button>
+        ) : null}
         <Button variant="ghost" onClick={onDescartar} disabled={aprovando}>
           Descartar
         </Button>

@@ -64,12 +64,16 @@ export default async function HomePage() {
           <CardHeader>
             <CardTitle>Treino de hoje 💪</CardTitle>
           </CardHeader>
-          <CardContent className="flex items-center justify-between gap-4">
+          <CardContent className="flex flex-col gap-4">
             <div>
-              <p className="font-medium">{proximoDia.nome}</p>
+              <p className="font-heading text-3xl font-semibold">{proximoDia.nome}</p>
               <p className="text-sm text-muted-foreground">{proximoDia.grupos_musculares.join(", ")}</p>
             </div>
-            <Button render={<Link href={`/treino/executar/${proximoDia.id}`}>Iniciar</Link>} nativeButton={false} />
+            <Button
+              render={<Link href={`/treino/executar/${proximoDia.id}`}>Iniciar treino</Link>}
+              nativeButton={false}
+              className="h-14 w-full text-base"
+            />
           </CardContent>
         </Card>
       ) : (
@@ -133,7 +137,7 @@ export default async function HomePage() {
         <Card>
           <CardContent className="flex flex-col gap-1 py-4">
             <span className="text-sm text-muted-foreground">Treinos essa semana</span>
-            <span className="font-heading text-3xl font-semibold">
+            <span className="font-heading text-4xl font-semibold">
               {resumoSemana.treinosFeitos}
               {anamnese ? <span className="text-base text-muted-foreground">/{anamnese.dias_disponiveis}</span> : null}
             </span>
@@ -142,19 +146,19 @@ export default async function HomePage() {
         <Card>
           <CardContent className="flex flex-col gap-1 py-4">
             <span className="text-sm text-muted-foreground">Séries essa semana</span>
-            <span className="font-heading text-3xl font-semibold">{resumoSemana.seriesFeitas}</span>
+            <span className="font-heading text-4xl font-semibold">{resumoSemana.seriesFeitas}</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col gap-1 py-4">
             <span className="text-sm text-muted-foreground">Tempo treinado</span>
-            <span className="font-heading text-3xl font-semibold">{formatarDuracao(resumoSemana.duracaoTotalSegundos)}</span>
+            <span className="font-heading text-4xl font-semibold">{formatarDuracao(resumoSemana.duracaoTotalSegundos)}</span>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="flex flex-col gap-1 py-4">
             <span className="text-sm text-muted-foreground">Streak</span>
-            <span className="flex items-center gap-1 font-heading text-3xl font-semibold">
+            <span className="flex items-center gap-1 font-heading text-4xl font-semibold">
               <Flame className="size-6 fill-orange-500 text-orange-500" /> {streak}
             </span>
           </CardContent>

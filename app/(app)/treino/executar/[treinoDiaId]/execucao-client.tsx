@@ -344,7 +344,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
         );
       })}
 
-      <Button onClick={concluirTreino} className="mt-2">
+      <Button onClick={concluirTreino} className="mt-2 h-14 w-full text-base">
         Concluir treino
       </Button>
 

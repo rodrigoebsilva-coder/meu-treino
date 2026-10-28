@@ -139,6 +139,21 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
     })();
   }, [sessaoIdLocal, treinoDiaId]);
 
+  // Mantém a tela acesa durante o treino pra o navegador não suspender o timer de descanso.
+  // shortcut: sem suporte (iOS antigo) ou negado, só ignora; o timer segue por timestamp.
+  useEffect(() => {
+    let lock: WakeLockSentinel | null = null;
+    const pedir = () => {
+      if (document.visibilityState === "visible") navigator.wakeLock?.request("screen").then((l) => (lock = l)).catch(() => {});
+    };
+    pedir();
+    document.addEventListener("visibilitychange", pedir);
+    return () => {
+      document.removeEventListener("visibilitychange", pedir);
+      void lock?.release();
+    };
+  }, []);
+
   // Timer total da sessão (só exibição, não precisa alarmar nada).
   useEffect(() => {
     if (!iniciadaEm) return;

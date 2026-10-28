@@ -368,6 +368,9 @@ treino PPL inicial).
   Smart Swap só troca cardio por cardio; "Carga por exercício" não lista cardio. Os
   exercícios base de cardio são marcados por nome na migration (vale em produção) **e** em
   `seeds/06_cardio.sql` (migration roda antes do seed no `db reset` local).
+- **Tela acesa durante a execução** (Wake Lock em `execucao-client.tsx`, ignorado se o
+  navegador não suporta) e **aviso ao sair** com séries não sincronizadas (`sair-button.tsx`):
+  mitigam, sem eliminar, o timer em segundo plano e a perda de séries ao sair offline.
 - **Personal SolIA** (`components/personal-solia.tsx`) é o avatar em pixel art (SVG de
   retângulos) que conduz o primeiro acesso.
 
@@ -413,8 +416,10 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 
-- Nomes dos 876 exercícios do seed estão em inglês (vêm direto do
-  free-exercise-db); tradução/ajuste para pt-BR é curadoria manual, incremental.
+- Nomes dos 876 exercícios base foram traduzidos para pt-BR em `supabase/seeds/07_nomes_pt.sql`
+  (casa pelo nome em inglês; `01`/`03`/`04`/`06` ainda usam o inglês e rodam antes). Alguns
+  termos técnicos ficaram em inglês de propósito (Clean, Snatch, Jerk, Pallof Press...).
+  Em cloud o seed não roda sozinho: `supabase db query --linked -f supabase/seeds/07_nomes_pt.sql`.
 - `imagem_url` dos exercícios base está `null` — curadoria manual (as imagens do
   free-exercise-db podem ser copiadas pro Storage depois, não hotlink).
   `youtube_url` também está `null` pra quase todo exercício, mas não bloqueia mais o

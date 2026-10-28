@@ -12,6 +12,8 @@ async function sairLimpando() {
   try {
     await sincronizar();
   } catch {}
+  const pendentes = await db.seriesLocais.filter((x) => !x.sincronizada).count();
+  if (pendentes > 0 && !confirm(`Há ${pendentes} série(s) ainda não sincronizada(s) (sem internet?). Se sair agora, elas serão perdidas. Sair mesmo assim?`)) return;
   await Promise.all([db.treinoCache.clear(), db.sessoesLocais.clear(), db.seriesLocais.clear()]);
   await sair();
 }

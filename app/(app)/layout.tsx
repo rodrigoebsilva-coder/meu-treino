@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { SoliaLogo } from "@/components/solia-logo";
 import { BottomNav } from "./bottom-nav";
+import { VoltarBar } from "./voltar-bar";
 import { SyncBoot } from "./sync-boot";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
@@ -13,9 +14,10 @@ export default async function AppLayout({ children }: { children: React.ReactNod
   }
 
   return (
-    <div className="flex min-h-screen flex-1 flex-col">
+    <div className="flex min-h-dvh flex-1 flex-col">
       <SyncBoot />
-      <div className="flex-1 pb-16">
+      <VoltarBar />
+      <div className="mx-auto w-full max-w-2xl flex-1 pb-4">
         {children}
         <footer className="flex flex-col items-center gap-1 p-6 pt-0 text-xs text-muted-foreground print:hidden">
           <span>Criado por</span>

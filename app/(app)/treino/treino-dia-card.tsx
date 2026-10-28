@@ -38,7 +38,7 @@ function ExercicioRow({
       style={{ transform: CSS.Transform.toString(transform), transition }}
       className={`flex items-center justify-between gap-2 rounded-md border bg-card p-2 ${isDragging ? "relative z-10 opacity-70" : ""}`}
     >
-      <div className="flex items-center gap-2">
+      <div className="flex min-w-0 items-center gap-2">
         <button
           type="button"
           {...attributes}

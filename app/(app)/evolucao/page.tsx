@@ -16,23 +16,36 @@ import { CargaExercicioChart } from "./carga-exercicio-chart";
 export default async function EvolucaoPage() {
   const supabase = await createClient();
 
-  const [peso, volume, frequencia, streak, exercicios] = await Promise.all([
+  const [peso, volume, frequencia, streak, planejados, trocados] = await Promise.all([
     buscarPesoHistorico(supabase),
     buscarVolumeSemanal(supabase),
     buscarFrequenciaSemanal(supabase),
     calcularStreak(supabase),
-    supabase
-      .from("exercicios")
-      .select("id, nome, grupo_muscular, youtube_url, dica_casa")
-      .order("nome", { ascending: true })
-      .returns<ExercicioResumo[]>(),
+    supabase.from("treino_exercicios").select("exercicio_id").not("exercicio_id", "is", null),
+    supabase.from("sessao_series").select("exercicio_realizado_id").not("exercicio_realizado_id", "is", null),
   ]);
+
+  // Só exercícios que já estiveram em algum treino (inclusive arquivados) ou foram feitos via troca.
+  const idsUsados = [
+    ...new Set([
+      ...(planejados.data ?? []).map((r) => r.exercicio_id as string),
+      ...(trocados.data ?? []).map((r) => r.exercicio_realizado_id as string),
+    ]),
+  ];
+  const exercicios = idsUsados.length
+    ? await supabase
+        .from("exercicios")
+        .select("id, nome, grupo_muscular, youtube_url, dica_casa")
+        .in("id", idsUsados)
+        .order("nome", { ascending: true })
+        .returns<ExercicioResumo[]>()
+    : { data: [] as ExercicioResumo[] };
 
   return (
     <main className="flex flex-col gap-6 p-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-center justify-between gap-2">
         <h1 className="text-2xl font-semibold">Evolução 📈</h1>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button variant="outline" render={<Link href="/evolucao/medidas">Medidas</Link>} nativeButton={false} />
           <Button variant="outline" render={<Link href="/evolucao/fotos">Fotos</Link>} nativeButton={false} />
           <Button variant="outline" render={<Link href="/relatorio">Relatório</Link>} nativeButton={false} />

@@ -149,6 +149,7 @@ export async function aprovarTreino(
         repeticoes_max: ex.repeticoes_max,
         carga_sugerida_kg: ex.carga_sugerida_kg,
         descanso_segundos: ex.descanso_segundos,
+        duracao_minutos: ex.duracao_minutos ?? null,
         metodo: ex.metodo,
         observacao: ex.observacao ?? null,
       });

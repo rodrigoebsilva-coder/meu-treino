@@ -348,6 +348,29 @@ treino PPL inicial).
   própria chave e é ilimitado. `aprovarTreino` lê o provedor de `geracoes_ia` (o cliente
   não sabe qual foi usado).
 
+- **Sessão aberta há mais de 5h é resolvida sozinha** (`lib/offline/sync.ts`,
+  `resolverSessoesAbandonadas`, roda a cada `sincronizar()`): sem séries é cancelada
+  (apaga local e remota); com séries é encerrada na hora da última série. A tela de
+  execução ignora sessões abandonadas ao decidir se reaproveita uma em andamento.
+- **Séries concluídas são editáveis e podem ser desmarcadas**: editar reenvia via `upsert`
+  (mesmo `idLocal`); desmarcar uma já sincronizada marca `removida` no Dexie e o sync apaga
+  a linha remota e depois a local (não sincronizada: apaga local direto). Carga/reps digitadas
+  numa série replicam pras seguintes (e pras anteriores ainda vazias); o valor do último treino
+  vem preenchido de verdade (não mais só placeholder).
+- **Descanso configurável por aparelho** (`preferenciasTimer.getDescanso`, localStorage,
+  em Config): se definido, vale no lugar do `descanso_segundos` de cada exercício.
+- **Listas de exercícios/modelos usam `SelectBusca`** (`components/ui/select-busca.tsx` +
+  `lib/busca.ts`): busca sem acento que tolera erro de digitação. Enums curtos continuam no `Select`.
+- **Cardio é medido por tempo** (migration 0019): `exercicios.tipo` ('forca'|'cardio'),
+  `treino_exercicios.duracao_minutos`, `sessao_series.duracao_segundos`. Cardio guarda
+  `series=1`, reps 1-1, descanso 0 só pra satisfazer os NOT NULL. A IA recebe `tipo` no
+  catálogo e devolve `duracao_minutos` (campo opcional novo no schema compartilhado);
+  Smart Swap só troca cardio por cardio; "Carga por exercício" não lista cardio. Os
+  exercícios base de cardio são marcados por nome na migration (vale em produção) **e** em
+  `seeds/06_cardio.sql` (migration roda antes do seed no `db reset` local).
+- **Personal SolIA** (`components/personal-solia.tsx`) é o avatar em pixel art (SVG de
+  retângulos) que conduz o primeiro acesso.
+
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
 
 0. ✅ Plano (schema, Edge Function, JSON da IA)
@@ -385,6 +408,8 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
     próximos passos em [HANDOFF-FASE-14.md](HANDOFF-FASE-14.md))
 
 15. ✅ Chave de IA compartilhada (do admin) + 1 geração por usuário, liberada pelo admin
+
+16. ✅ Ajustes pós-uso: execução editável, descanso configurável, busca nas listas, Personal SolIA, cardio por tempo
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 

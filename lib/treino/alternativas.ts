@@ -1,13 +1,14 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 
 export function escolherAlternativas(
-  original: { id: string; grupo_muscular: string; equipamento: string | null },
-  candidatos: { id: string; grupo_muscular: string; equipamento: string | null }[],
+  original: { id: string; grupo_muscular: string; equipamento: string | null; tipo: string },
+  candidatos: { id: string; grupo_muscular: string; equipamento: string | null; tipo: string }[],
   excluirIds: Set<string>,
   quantidade = 2
 ): string[] {
   return candidatos
     .filter((c) => c.id !== original.id && !excluirIds.has(c.id))
+    .filter((c) => c.tipo === original.tipo)
     .filter((c) => c.grupo_muscular === original.grupo_muscular)
     .filter((c) => c.equipamento !== original.equipamento)
     .slice(0, quantidade)
@@ -34,7 +35,7 @@ export async function gerarAlternativasParaTreino(supabase: SupabaseClient, trei
   );
   if (pendentes.length === 0) return;
 
-  const { data: exercicios } = await supabase.from("exercicios").select("id, grupo_muscular, equipamento");
+  const { data: exercicios } = await supabase.from("exercicios").select("id, grupo_muscular, equipamento, tipo");
   if (!exercicios) return;
   const exerciciosPorId = new Map(exercicios.map((e) => [e.id, e]));
 

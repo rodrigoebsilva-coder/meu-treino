@@ -15,6 +15,7 @@ export function montarSystemPrompt(): string {
     "Regras:",
     "- Prefira exercícios já existentes na base (use exercicio_id) quando houver um equivalente adequado; só sugira um exercício novo (nome_exercicio_sugerido, com exercicio_id null) quando não houver opção parecida na base.",
     "- Respeite o nível, objetivo, lesões e dias disponíveis informados no perfil do usuário.",
+    "- Exercícios de cardio (tipo \"cardio\" no catálogo: esteira, bicicleta, elíptico...) são medidos por TEMPO: preencha duracao_minutos, com series=1, repeticoes_min=1, repeticoes_max=1, carga_sugerida_kg=null e descanso_segundos=0. Nos demais, deixe duracao_minutos null.",
     "- Sempre preencha \"justificativa\" explicando o raciocínio em 2 a 4 frases, em português.",
     "- Ao ajustar um treino existente (tipo de ação != novo_ciclo), preencha \"mudancas\" descrevendo cada alteração relevante; ao criar um ciclo novo do zero, \"mudancas\" pode ficar vazio.",
   ].join("\n");

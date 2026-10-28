@@ -51,7 +51,9 @@ function ExercicioRow({
         <div className="flex flex-col">
           <span className="font-medium">{ex.exercicio?.nome ?? ex.nome_exercicio_sugerido}</span>
           <span className="text-xs text-muted-foreground">
-            {ex.series}x {ex.repeticoes_min}-{ex.repeticoes_max} · {ex.descanso_segundos}s descanso
+            {ex.duracao_minutos
+              ? `${ex.duracao_minutos} min`
+              : `${ex.series}x ${ex.repeticoes_min}-${ex.repeticoes_max} · ${ex.descanso_segundos}s descanso`}
             {ex.carga_sugerida_kg ? ` · ${ex.carga_sugerida_kg}kg` : ""}
           </span>
         </div>

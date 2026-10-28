@@ -6,7 +6,7 @@ export async function montarContexto(supabase: SupabaseClient) {
   const { data: treinoAtivo } = await supabase
     .from("treinos")
     .select(
-      "id, nome_ciclo, criado_em, treino_dias(ordem, nome, grupos_musculares, treino_exercicios(ordem, series, repeticoes_min, repeticoes_max, carga_sugerida_kg, descanso_segundos, metodo, exercicio:exercicios(id, nome, grupo_muscular)))"
+      "id, nome_ciclo, criado_em, treino_dias(ordem, nome, grupos_musculares, treino_exercicios(ordem, series, repeticoes_min, repeticoes_max, carga_sugerida_kg, descanso_segundos, duracao_minutos, metodo, exercicio:exercicios(id, nome, grupo_muscular, tipo)))"
     )
     .eq("status", "ativo")
     .order("ordem", { referencedTable: "treino_dias", ascending: true })
@@ -22,7 +22,7 @@ export async function montarContexto(supabase: SupabaseClient) {
   const { data: sessoesRecentes } = await supabase
     .from("sessoes")
     .select(
-      "iniciada_em, finalizada_em, duracao_segundos, energia, sono, dor, notas, sessao_series(numero_serie, carga_real_kg, repeticoes_real, rpe, treino_exercicio_id, exercicio_realizado_id)"
+      "iniciada_em, finalizada_em, duracao_segundos, energia, sono, dor, notas, sessao_series(numero_serie, carga_real_kg, repeticoes_real, duracao_segundos, rpe, treino_exercicio_id, exercicio_realizado_id)"
     )
     .not("finalizada_em", "is", null)
     .order("iniciada_em", { ascending: false })
@@ -36,7 +36,7 @@ export async function montarContexto(supabase: SupabaseClient) {
 
   const { data: catalogoExercicios } = await supabase
     .from("exercicios")
-    .select("id, nome, grupo_muscular, equipamento")
+    .select("id, nome, grupo_muscular, equipamento, tipo")
     .order("nome", { ascending: true })
     .limit(250);
 

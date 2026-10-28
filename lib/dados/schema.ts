@@ -29,6 +29,7 @@ export const TreinoExercicioExportSchema = z.object({
   repeticoes_max: z.number().int(),
   carga_sugerida_kg: z.number().nullable(),
   descanso_segundos: z.number().int(),
+  duracao_minutos: z.number().int().nullable().optional(),
   metodo: z.enum(["normal", "biset", "drop_set", "rest_pause", "piramide"]),
   observacao: z.string().nullable(),
 });
@@ -60,6 +61,7 @@ export const SessaoSerieExportSchema = z.object({
   rpe: z.number().int().nullable(),
   concluida_em: z.string(),
   exercicio_realizado_id: z.string().uuid().nullable().optional(),
+  duracao_segundos: z.number().int().nullable().optional(),
 });
 
 export const SessaoExportSchema = z.object({

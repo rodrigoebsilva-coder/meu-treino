@@ -139,6 +139,7 @@ async function aplicarImportacao(
             repeticoes_max: ex.repeticoes_max,
             carga_sugerida_kg: ex.carga_sugerida_kg,
             descanso_segundos: ex.descanso_segundos,
+            duracao_minutos: ex.duracao_minutos ?? null,
             metodo: ex.metodo,
             observacao: ex.observacao,
           })
@@ -188,6 +189,7 @@ async function aplicarImportacao(
         concluida_em: serie.concluida_em,
         origem_offline: false,
         exercicio_realizado_id: exercicioRealizadoId,
+        duracao_segundos: serie.duracao_segundos ?? null,
       });
       if (erroSerie) throw new Error("série de treino");
     }

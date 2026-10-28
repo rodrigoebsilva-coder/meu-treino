@@ -18,9 +18,9 @@ import { CheckinDialog, type CheckinValores } from "./checkin-dialog";
 import { ExercicioVideoButton } from "../../exercicio-video-button";
 import { TrocaExercicioButton } from "./troca-exercicio-button";
 
-type Sugestao = { cargaRealKg: number | null; repeticoesReal: number | null };
+type Sugestao = { cargaRealKg: number | null; repeticoesReal: number | null; duracaoSegundos?: number | null };
 type Concluida = Sugestao & { idLocal: string; rpe: number | null };
-type ValoresSerie = { carga: string; reps: string; rpe: string };
+type ValoresSerie = { carga: string; reps: string; rpe: string; min?: string };
 
 function chaveSerie(treinoExercicioId: string, numeroSerie: number) {
   return `${treinoExercicioId}:${numeroSerie}`;
@@ -105,6 +105,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
           idLocal: s.idLocal,
           cargaRealKg: s.cargaRealKg,
           repeticoesReal: s.repeticoesReal,
+          duracaoSegundos: s.duracaoSegundos,
           rpe: s.rpe,
         };
       }
@@ -117,7 +118,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
       const supabase = createClient();
       const { data: ultimaSessao } = await supabase
         .from("sessoes")
-        .select("sessao_series(treino_exercicio_id, numero_serie, carga_real_kg, repeticoes_real)")
+        .select("sessao_series(treino_exercicio_id, numero_serie, carga_real_kg, repeticoes_real, duracao_segundos)")
         .eq("treino_dia_id", treinoDiaId)
         .not("finalizada_em", "is", null)
         .order("iniciada_em", { ascending: false })
@@ -131,6 +132,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
         mapa[chaveSerie(s.treino_exercicio_id, s.numero_serie)] = {
           cargaRealKg: s.carga_real_kg,
           repeticoesReal: s.repeticoes_real,
+          duracaoSegundos: s.duracao_segundos,
         };
       }
       setSugestoes(mapa);
@@ -171,12 +173,18 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
   }
 
   // Edita uma série já concluída (carga, reps ou RPE) e reenvia na próxima sincronização.
-  async function editarConcluida(chave: string, campo: "carga" | "reps" | "rpe", texto: string) {
+  async function editarConcluida(chave: string, campo: "carga" | "reps" | "rpe" | "min", texto: string) {
     const feita = concluidas[chave];
     if (!feita) return;
     const numero = texto.trim() === "" ? null : Number(texto);
     const mudanca =
-      campo === "carga" ? { cargaRealKg: numero } : campo === "reps" ? { repeticoesReal: numero } : { rpe: numero };
+      campo === "carga"
+        ? { cargaRealKg: numero }
+        : campo === "reps"
+          ? { repeticoesReal: numero }
+          : campo === "min"
+            ? { duracaoSegundos: numero === null ? null : Math.round(numero * 60) }
+            : { rpe: numero };
     setConcluidas((prev) => ({ ...prev, [chave]: { ...prev[chave], ...mudanca } }));
     await db.seriesLocais.update(feita.idLocal, { ...mudanca, sincronizada: false });
   }
@@ -198,6 +206,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
         carga: feita.cargaRealKg?.toString() ?? "",
         reps: feita.repeticoesReal?.toString() ?? "",
         rpe: feita.rpe?.toString() ?? "",
+        min: feita.duracaoSegundos ? String(Math.round(feita.duracaoSegundos / 60)) : "",
       },
     }));
     descanso.cancelar();
@@ -211,13 +220,22 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
     const sugestao = sugestoes[chave];
     const ex = dia?.treino_exercicios.find((e) => e.id === treinoExercicioId);
 
-    const cargaRealKg =
-      v?.carga !== undefined && v.carga.trim() !== ""
+    const ehCardio = ex?.exercicio?.tipo === "cardio";
+    const minutos = v?.min?.trim()
+      ? Number(v.min)
+      : sugestao?.duracaoSegundos
+        ? Math.round(sugestao.duracaoSegundos / 60)
+        : (ex?.duracao_minutos ?? null);
+
+    const cargaRealKg = ehCardio
+      ? null
+      : v?.carga !== undefined && v.carga.trim() !== ""
         ? Number(v.carga)
         : (sugestao?.cargaRealKg ?? ex?.carga_sugerida_kg ?? null);
 
-    const repeticoesReal =
-      v?.reps !== undefined && v.reps.trim() !== ""
+    const repeticoesReal = ehCardio
+      ? null
+      : v?.reps !== undefined && v.reps.trim() !== ""
         ? Number(v.reps)
         : (sugestao?.repeticoesReal ?? ex?.repeticoes_min ?? null);
 
@@ -229,6 +247,7 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
       cargaRealKg,
       repeticoesReal,
       rpe: v?.rpe && v.rpe.trim() !== "" ? Number(v.rpe) : null,
+      duracaoSegundos: ehCardio && minutos !== null ? Math.round(minutos * 60) : null,
       concluidaEm: new Date().toISOString(),
       sincronizada: false,
       exercicioRealizadoId: substituicoes[treinoExercicioId] ?? null,
@@ -236,9 +255,15 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
     await db.seriesLocais.add(serie);
     setConcluidas((prev) => ({
       ...prev,
-      [chave]: { idLocal: serie.idLocal, cargaRealKg: serie.cargaRealKg, repeticoesReal: serie.repeticoesReal, rpe: serie.rpe },
+      [chave]: {
+        idLocal: serie.idLocal,
+        cargaRealKg: serie.cargaRealKg,
+        repeticoesReal: serie.repeticoesReal,
+        duracaoSegundos: serie.duracaoSegundos,
+        rpe: serie.rpe,
+      },
     }));
-    descanso.iniciar(preferenciasTimer.getDescanso() ?? descansoSegundos);
+    if (!ehCardio) descanso.iniciar(preferenciasTimer.getDescanso() ?? descansoSegundos);
     void sincronizar();
   }
 
@@ -346,12 +371,40 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
                   ) : null}
                 </div>
               ) : null}
-              {Array.from({ length: ex.series }, (_, i) => i + 1).map((numeroSerie) => {
+              {Array.from({ length: ex.exercicio?.tipo === "cardio" ? 1 : ex.series }, (_, i) => i + 1).map((numeroSerie) => {
                 const chave = chaveSerie(ex.id, numeroSerie);
                 const feita = concluidas[chave];
                 const sugestao = sugestoes[chave];
                 const cargaPadrao = sugestao?.cargaRealKg?.toString() ?? ex.carga_sugerida_kg?.toString() ?? "";
                 const repsPadrao = sugestao?.repeticoesReal?.toString() ?? "";
+
+                if (ex.exercicio?.tipo === "cardio") {
+                  const minPadrao = sugestao?.duracaoSegundos
+                    ? String(Math.round(sugestao.duracaoSegundos / 60))
+                    : (ex.duracao_minutos?.toString() ?? "");
+                  return (
+                    <div key={chave} className="flex items-center gap-2">
+                      <Checkbox
+                        checked={!!feita}
+                        onCheckedChange={(marcado) => {
+                          if (marcado) void concluirSerie(ex.id, numeroSerie, 0);
+                          else void desmarcarSerie(chave);
+                        }}
+                      />
+                      <Input
+                        className="w-24"
+                        type="number"
+                        inputMode="numeric"
+                        min={1}
+                        placeholder="min"
+                        value={feita ? (feita.duracaoSegundos ? String(Math.round(feita.duracaoSegundos / 60)) : "") : valorAtual(chave, "min", minPadrao)}
+                        onChange={(e) => (feita ? void editarConcluida(chave, "min", e.target.value) : atualizarValor(chave, "min", e.target.value))}
+                        onBlur={() => feita && void sincronizar()}
+                      />
+                      <span className="text-sm text-muted-foreground">min</span>
+                    </div>
+                  );
+                }
 
                 return (
                   <div key={chave} className="flex items-center gap-2">

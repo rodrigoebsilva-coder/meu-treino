@@ -37,6 +37,7 @@ export function ExercicioEditSheet({
   onOpenChange: (aberto: boolean) => void;
 }) {
   const [exercicioId, setExercicioId] = useState(treinoExercicio.exercicio_id ?? "");
+  const ehCardio = exerciciosDisponiveis.find((e) => e.id === exercicioId)?.tipo === "cardio";
   const acao = atualizarExercicio.bind(null, treinoExercicio.id);
   const [state, formAction, pending] = useActionState(acao, INITIAL_STATE);
 
@@ -69,6 +70,26 @@ export function ExercicioEditSheet({
             />
           </div>
 
+          {ehCardio ? (
+            <>
+              <input type="hidden" name="series" value={1} />
+              <input type="hidden" name="repeticoes_min" value={1} />
+              <input type="hidden" name="repeticoes_max" value={1} />
+              <input type="hidden" name="descanso_segundos" value={0} />
+              <div className="flex flex-col gap-2">
+                <Label htmlFor="duracao_minutos">Duração (minutos)</Label>
+                <Input
+                  id="duracao_minutos"
+                  name="duracao_minutos"
+                  type="number"
+                  min={1}
+                  defaultValue={treinoExercicio.duracao_minutos ?? 30}
+                  required
+                />
+              </div>
+            </>
+          ) : (
+            <>
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col gap-2">
               <Label htmlFor="series">Séries</Label>
@@ -122,6 +143,8 @@ export function ExercicioEditSheet({
               />
             </div>
           </div>
+            </>
+          )}
 
           <div className="flex flex-col gap-2">
             <Label htmlFor="metodo">Método</Label>

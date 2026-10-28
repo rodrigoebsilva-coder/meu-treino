@@ -6,7 +6,7 @@ import { gerarAlternativasParaTreino } from "@/lib/treino/alternativas";
 import { TreinoView } from "./treino-view";
 
 const SELECT_TREINO =
-  "*, treino_dias(*, treino_exercicios(*, exercicio:exercicios(id, nome, grupo_muscular, youtube_url, dica_casa), alternativas:treino_exercicio_alternativas(exercicio_id)))";
+  "*, treino_dias(*, treino_exercicios(*, exercicio:exercicios(id, nome, grupo_muscular, youtube_url, dica_casa, tipo), alternativas:treino_exercicio_alternativas(exercicio_id)))";
 
 export default async function TreinoPage() {
   const supabase = await createClient();
@@ -37,7 +37,7 @@ export default async function TreinoPage() {
 
   const { data: exercicios } = await supabase
     .from("exercicios")
-    .select("id, nome, grupo_muscular, youtube_url, dica_casa")
+    .select("id, nome, grupo_muscular, youtube_url, dica_casa, tipo")
     .order("nome", { ascending: true })
     .returns<ExercicioResumo[]>();
 

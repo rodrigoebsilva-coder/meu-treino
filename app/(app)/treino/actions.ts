@@ -19,6 +19,7 @@ export async function atualizarExercicio(
     repeticoes_min: formData.get("repeticoes_min"),
     repeticoes_max: formData.get("repeticoes_max"),
     carga_sugerida_kg: formData.get("carga_sugerida_kg") || undefined,
+    duracao_minutos: formData.get("duracao_minutos") || undefined,
     descanso_segundos: formData.get("descanso_segundos"),
     metodo: formData.get("metodo"),
     observacao: formData.get("observacao") || undefined,
@@ -34,6 +35,7 @@ export async function atualizarExercicio(
     .update({
       ...parsed.data,
       carga_sugerida_kg: parsed.data.carga_sugerida_kg ?? null,
+      duracao_minutos: parsed.data.duracao_minutos ?? null,
       observacao: parsed.data.observacao ?? null,
     })
     .eq("id", treinoExercicioId);

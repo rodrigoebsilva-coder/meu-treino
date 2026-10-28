@@ -134,6 +134,7 @@ async function sincronizarUmaVez() {
           concluida_em: serie.concluidaEm,
           origem_offline: true,
           exercicio_realizado_id: serie.exercicioRealizadoId,
+          duracao_segundos: serie.duracaoSegundos ?? null,
         },
         { onConflict: "id" }
       );

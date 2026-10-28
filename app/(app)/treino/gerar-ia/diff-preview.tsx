@@ -81,8 +81,14 @@ export function DiffPreview({
                   {!ex.exercicio_id ? <Badge variant="outline" className="ml-2">novo</Badge> : null}
                 </span>
                 <span className="text-muted-foreground">
-                  {ex.series}x{ex.repeticoes_min}-{ex.repeticoes_max}
-                  {ex.carga_sugerida_kg ? ` · ${ex.carga_sugerida_kg}kg` : ""} · {ex.descanso_segundos}s
+                  {ex.duracao_minutos ? (
+                    `${ex.duracao_minutos} min`
+                  ) : (
+                    <>
+                      {ex.series}x{ex.repeticoes_min}-{ex.repeticoes_max}
+                      {ex.carga_sugerida_kg ? ` · ${ex.carga_sugerida_kg}kg` : ""} · {ex.descanso_segundos}s
+                    </>
+                  )}
                 </span>
               </div>
             ))}

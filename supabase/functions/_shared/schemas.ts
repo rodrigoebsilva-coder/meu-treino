@@ -15,6 +15,7 @@ export const SerieGeradaSchema = z.object({
   repeticoes_max: z.number().int().min(1),
   carga_sugerida_kg: z.number().nullable(),
   descanso_segundos: z.number().int().min(0),
+  duracao_minutos: z.number().int().min(1).nullable().optional(),
   metodo: z.enum(["normal", "biset", "drop_set", "rest_pause", "piramide"]).default("normal"),
   observacao: z.string().optional(),
 });

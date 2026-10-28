@@ -35,8 +35,9 @@ export default async function EvolucaoPage() {
   const exercicios = idsUsados.length
     ? await supabase
         .from("exercicios")
-        .select("id, nome, grupo_muscular, youtube_url, dica_casa")
+        .select("id, nome, grupo_muscular, youtube_url, dica_casa, tipo")
         .in("id", idsUsados)
+        .neq("tipo", "cardio")
         .order("nome", { ascending: true })
         .returns<ExercicioResumo[]>()
     : { data: [] as ExercicioResumo[] };

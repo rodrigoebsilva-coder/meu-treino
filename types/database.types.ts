@@ -155,12 +155,14 @@ export type Database = {
           id: string;
           imagem_url: string | null;
           nome: string;
+          tipo: string;
           origem: Database["public"]["Enums"]["origem_exercicio"];
           user_id: string | null;
           youtube_url: string | null;
         };
         ComputedFields: never;
         Insert: {
+          tipo?: string;
           criado_em?: string;
           dica_casa?: string | null;
           equipamento?: string | null;
@@ -173,6 +175,7 @@ export type Database = {
           youtube_url?: string | null;
         };
         Update: {
+          tipo?: string;
           criado_em?: string;
           dica_casa?: string | null;
           equipamento?: string | null;
@@ -326,6 +329,7 @@ export type Database = {
         Row: {
           carga_real_kg: number | null;
           concluida_em: string;
+          duracao_segundos: number | null;
           exercicio_realizado_id: string | null;
           id: string;
           numero_serie: number;
@@ -338,6 +342,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          duracao_segundos?: number | null;
           carga_real_kg?: number | null;
           concluida_em?: string;
           exercicio_realizado_id?: string | null;
@@ -351,6 +356,7 @@ export type Database = {
           user_id?: string;
         };
         Update: {
+          duracao_segundos?: number | null;
           carga_real_kg?: number | null;
           concluida_em?: string;
           exercicio_realizado_id?: string | null;
@@ -515,6 +521,7 @@ export type Database = {
         Row: {
           carga_sugerida_kg: number | null;
           descanso_segundos: number;
+          duracao_minutos: number | null;
           exercicio_id: string | null;
           id: string;
           metodo: Database["public"]["Enums"]["metodo_serie"];
@@ -529,6 +536,7 @@ export type Database = {
         };
         ComputedFields: never;
         Insert: {
+          duracao_minutos?: number | null;
           carga_sugerida_kg?: number | null;
           descanso_segundos?: number;
           exercicio_id?: string | null;
@@ -544,6 +552,7 @@ export type Database = {
           user_id?: string;
         };
         Update: {
+          duracao_minutos?: number | null;
           carga_sugerida_kg?: number | null;
           descanso_segundos?: number;
           exercicio_id?: string | null;

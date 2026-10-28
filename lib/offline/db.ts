@@ -39,6 +39,8 @@ export interface SerieLocal {
   exercicioRealizadoId: string | null;
   // Desmarcada depois de já sincronizada: o sync apaga a linha remota e depois a local.
   removida?: boolean;
+  // Cardio (esteira, bike...): tempo em vez de carga/reps.
+  duracaoSegundos?: number | null;
 }
 
 export const db = new Dexie("meu-treino") as Dexie & {

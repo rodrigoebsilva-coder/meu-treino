@@ -23,12 +23,12 @@ export async function GET() {
       supabase
         .from("treinos")
         .select(
-          "nome_ciclo, status, origem, justificativa_ia, criado_em, arquivado_em, duracao_semanas, treino_dias(id, ordem, nome, grupos_musculares, treino_exercicios(id, exercicio_id, nome_exercicio_sugerido, ordem, series, repeticoes_min, repeticoes_max, carga_sugerida_kg, descanso_segundos, metodo, observacao, exercicios(nome)))"
+          "nome_ciclo, status, origem, justificativa_ia, criado_em, arquivado_em, duracao_semanas, treino_dias(id, ordem, nome, grupos_musculares, treino_exercicios(id, exercicio_id, nome_exercicio_sugerido, ordem, series, repeticoes_min, repeticoes_max, carga_sugerida_kg, descanso_segundos, duracao_minutos, metodo, observacao, exercicios(nome)))"
         ),
       supabase
         .from("sessoes")
         .select(
-          "treino_dia_id, iniciada_em, finalizada_em, duracao_segundos, energia, sono, dor, notas, sessao_series(treino_exercicio_id, numero_serie, carga_real_kg, repeticoes_real, rpe, concluida_em, exercicio_realizado_id)"
+          "treino_dia_id, iniciada_em, finalizada_em, duracao_segundos, energia, sono, dor, notas, sessao_series(treino_exercicio_id, numero_serie, carga_real_kg, repeticoes_real, rpe, concluida_em, exercicio_realizado_id, duracao_segundos)"
         ),
       supabase
         .from("medidas")
@@ -73,6 +73,7 @@ export async function GET() {
                 repeticoes_max: e.repeticoes_max,
                 carga_sugerida_kg: e.carga_sugerida_kg,
                 descanso_segundos: e.descanso_segundos,
+                duracao_minutos: e.duracao_minutos,
                 metodo: e.metodo,
                 observacao: e.observacao,
               };

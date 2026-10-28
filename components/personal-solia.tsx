@@ -1,4 +1,4 @@
-// Personal SolIA: personagem em pixel art (pele clara, cabelo preto, regata, shorts e faixa na cabeça).
+// Personal sofiA: personagem em pixel art (pele clara, cabelo preto, regata, shorts e faixa na cabeça).
 const CORES: Record<string, string> = {
   K: "#1B1B24", // cabelo
   S: "#FFE6D8", // pele
@@ -44,7 +44,7 @@ export function PersonalSolia({ className }: { className?: string }) {
       className={className}
       shapeRendering="crispEdges"
       role="img"
-      aria-label="Personal SolIA"
+      aria-label="Personal sofiA"
     >
       {PIXELS.flatMap((linha, y) =>
         [...linha].map((c, x) =>

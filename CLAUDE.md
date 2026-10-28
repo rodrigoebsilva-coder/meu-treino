@@ -371,7 +371,7 @@ treino PPL inicial).
 - **Tela acesa durante a execução** (Wake Lock em `execucao-client.tsx`, ignorado se o
   navegador não suporta) e **aviso ao sair** com séries não sincronizadas (`sair-button.tsx`):
   mitigam, sem eliminar, o timer em segundo plano e a perda de séries ao sair offline.
-- **Personal SolIA** (`components/personal-solia.tsx`) é o avatar em pixel art (SVG de
+- **Personal sofiA** (`components/personal-solia.tsx`) é o avatar em pixel art (SVG de
   retângulos) que conduz o primeiro acesso.
 
 ## Fases (uma por vez, com aprovação antes de começar a próxima)
@@ -412,7 +412,7 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
 
 15. ✅ Chave de IA compartilhada (do admin) + 1 geração por usuário, liberada pelo admin
 
-16. ✅ Ajustes pós-uso: execução editável, descanso configurável, busca nas listas, Personal SolIA, cardio por tempo
+16. ✅ Ajustes pós-uso: execução editável, descanso configurável, busca nas listas, Personal sofiA, cardio por tempo
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 
@@ -442,7 +442,7 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
 - **Versão do app**: `version` do `package.json` (aparece no rodapé como `vX.Y.Z`, via
   `NEXT_PUBLIC_APP_VERSION` em `next.config.ts`). **Toda alteração pedida sobe a versão**
   (patch p/ ajuste, minor p/ funcionalidade) e vai no commit, pra o usuário conferir que está
-  na versão certa. Atual: 0.17.1.
+  na versão certa. Atual: 0.17.2.
 - Fim de cada fase: lint + typecheck (+ testes quando existirem) + commit + resumo
   do que foi feito e como testar.
 - Nunca commitar `.env.local` nem qualquer chave. `.env.example` é o único template

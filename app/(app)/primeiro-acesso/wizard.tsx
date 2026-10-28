@@ -287,7 +287,7 @@ export function Wizard() {
       <main className="flex min-h-[calc(100dvh-4rem)] flex-col items-center gap-6 p-6 animate-in fade-in duration-500">
         <PersonalSolia className="mt-4 h-52 drop-shadow-md" />
         <div className="w-full rounded-2xl border border-border bg-card p-5 text-left shadow-sm">
-          <p className="font-heading text-xl font-semibold">Oi, eu sou a Personal SolIA! 💪</p>
+          <p className="font-heading text-xl font-semibold">Oi, eu sou a Personal sofiA! 💪</p>
           <p className="mt-2 text-muted-foreground">
             Sou uma personal trainer de inteligência artificial e vou acompanhar você em toda a sua jornada: montar
             o seu treino, ajustar quando precisar e comemorar cada evolução.

@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
+import { PersonalSolia } from "@/components/personal-solia";
 import { dataLocalString } from "@/lib/semana";
 import { salvarAnamnese } from "../perfil/actions";
 
@@ -205,10 +206,20 @@ function temResposta(p: Passo, v: Valores) {
   return Boolean(v[p.id]);
 }
 
+function Balao({ children }: { children: React.ReactNode }) {
+  return (
+    <div className="relative flex-1 rounded-2xl border border-border bg-card p-4 text-left shadow-sm">
+      <span className="absolute top-6 -left-1.5 size-3 rotate-45 border-b border-l border-border bg-card" />
+      {children}
+    </div>
+  );
+}
+
 export function Wizard() {
   const router = useRouter();
   const [valores, setValores] = useState<Valores>({ semanas: "12" });
   const [indice, setIndice] = useState(0);
+  const [comecou, setComecou] = useState(false);
   const [enviando, setEnviando] = useState(false);
   const [erro, setErro] = useState<string | null>(null);
 
@@ -271,6 +282,27 @@ export function Wizard() {
       ativo && "border-primary bg-primary text-primary-foreground shadow-primary/30"
     );
 
+  if (!comecou) {
+    return (
+      <main className="flex min-h-[calc(100dvh-4rem)] flex-col items-center gap-6 p-6 animate-in fade-in duration-500">
+        <PersonalSolia className="mt-4 h-52 drop-shadow-md" />
+        <div className="w-full rounded-2xl border border-border bg-card p-5 text-left shadow-sm">
+          <p className="font-heading text-xl font-semibold">Oi, eu sou a Personal SolIA! 💪</p>
+          <p className="mt-2 text-muted-foreground">
+            Sou uma personal trainer de inteligência artificial e vou acompanhar você em toda a sua jornada: montar
+            o seu treino, ajustar quando precisar e comemorar cada evolução.
+          </p>
+          <p className="mt-2 text-muted-foreground">
+            Para começar, vou te fazer algumas perguntinhas rápidas. Dá para pular as opcionais, combinado?
+          </p>
+        </div>
+        <Button className="mt-auto h-14 w-full text-base" onClick={() => setComecou(true)}>
+          Bora começar! <ArrowRight />
+        </Button>
+      </main>
+    );
+  }
+
   return (
     <main className="flex min-h-[calc(100dvh-4rem)] flex-col gap-6 p-6">
       <div className="flex flex-col gap-2">
@@ -286,10 +318,14 @@ export function Wizard() {
 
       {passo ? (
         <div key={passo.id} className="flex flex-1 flex-col gap-6 animate-in fade-in slide-in-from-right-4 duration-300">
-          <div className="flex flex-col gap-2 text-center">
-            <span className="text-5xl">{passo.emoji}</span>
-            <h1 className="font-heading text-2xl font-semibold">{passo.titulo}</h1>
-            {passo.dica ? <p className="text-sm text-muted-foreground">{passo.dica}</p> : null}
+          <div className="flex items-start gap-3">
+            <PersonalSolia className="h-24 shrink-0" />
+            <Balao>
+              <h1 className="font-heading text-lg leading-snug font-semibold">
+                {passo.emoji} {passo.titulo}
+              </h1>
+              {passo.dica ? <p className="mt-1 text-sm text-muted-foreground">{passo.dica}</p> : null}
+            </Balao>
           </div>
 
           {passo.tipo === "escolha" ? (
@@ -402,11 +438,14 @@ export function Wizard() {
         </div>
       ) : (
         <div className="flex flex-1 flex-col items-center gap-6 text-center animate-in fade-in zoom-in-95 duration-300">
-          <span className="text-6xl">🏆</span>
-          <h1 className="font-heading text-2xl font-semibold">Perfil completo!</h1>
-          <p className="text-muted-foreground">
-            Você ganhou {passos.length * 10} XP. Agora a IA monta o seu primeiro ciclo de treino.
-          </p>
+          <PersonalSolia className="h-40" />
+          <div className="w-full rounded-2xl border border-border bg-card p-4 shadow-sm">
+            <h1 className="font-heading text-xl font-semibold">Perfil completo! 🏆</h1>
+            <p className="mt-1 text-muted-foreground">
+              Pronto, já sei tudo que preciso! Você ganhou {passos.length * 10} XP. Agora eu monto o seu primeiro
+              ciclo de treino e a gente começa essa jornada juntos.
+            </p>
+          </div>
           {erro ? <p className="text-sm text-destructive">{erro}</p> : null}
           <div className="mt-auto flex w-full flex-col gap-3">
             <Button className="h-14 w-full text-base" disabled={enviando} onClick={() => finalizar(true)}>

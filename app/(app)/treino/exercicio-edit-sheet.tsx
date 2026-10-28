@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useActionState, useState } from "react";
 import {
   Sheet,
   SheetContent,
@@ -19,6 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SelectBusca } from "@/components/ui/select-busca";
 import { atualizarDicaCasa, atualizarExercicio, type AcaoState } from "./actions";
 import { METODO_LABEL, type ExercicioResumo, type TreinoExercicioComDados, type MetodoSerie } from "@/lib/treino/types";
 
@@ -35,6 +36,7 @@ export function ExercicioEditSheet({
   aberto: boolean;
   onOpenChange: (aberto: boolean) => void;
 }) {
+  const [exercicioId, setExercicioId] = useState(treinoExercicio.exercicio_id ?? "");
   const acao = atualizarExercicio.bind(null, treinoExercicio.id);
   const [state, formAction, pending] = useActionState(acao, INITIAL_STATE);
 
@@ -56,22 +58,15 @@ export function ExercicioEditSheet({
         <form action={formAction} className="flex flex-col gap-4 overflow-y-auto px-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="exercicio_id">Exercício</Label>
-            <Select name="exercicio_id" defaultValue={treinoExercicio.exercicio_id ?? undefined}>
-              <SelectTrigger id="exercicio_id" className="w-full">
-                <SelectValue>
-                  {(valor: string) =>
-                    exerciciosDisponiveis.find((e) => e.id === valor)?.nome ?? treinoExercicio.exercicio?.nome
-                  }
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {exerciciosDisponiveis.map((ex) => (
-                  <SelectItem key={ex.id} value={ex.id}>
-                    {ex.nome} · {ex.grupo_muscular}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SelectBusca
+              id="exercicio_id"
+              name="exercicio_id"
+              titulo="Escolher exercício"
+              placeholder={treinoExercicio.exercicio?.nome ?? "Escolha um exercício"}
+              value={exercicioId}
+              onValueChange={setExercicioId}
+              itens={exerciciosDisponiveis.map((ex) => ({ value: ex.id, label: ex.nome, detalhe: ex.grupo_muscular }))}
+            />
           </div>
 
           <div className="grid grid-cols-3 gap-3">

@@ -12,6 +12,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { SelectBusca } from "@/components/ui/select-busca";
 import { cn } from "@/lib/utils";
 import { gerarTreinoIA, type GerarState } from "./actions";
 import { TIPO_ACAO, TIPO_ACAO_LABEL, type TipoAcao, type TreinoGerado } from "@/lib/ai/schemas";
@@ -184,18 +185,13 @@ export function GerarForm({
         {modelos ? (
           <div className="flex flex-col gap-2">
             <Label htmlFor="modelo-select">Modelo</Label>
-            <Select value={modelo} onValueChange={(v) => v && setModelo(v)}>
-              <SelectTrigger id="modelo-select" className="w-full">
-                <SelectValue>{(v: string) => modelos.find((m) => m.id === v)?.nome ?? v}</SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {modelos.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
-                    {m.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SelectBusca
+              id="modelo-select"
+              titulo="Escolher modelo"
+              value={modelo}
+              onValueChange={setModelo}
+              itens={modelos.map((m) => ({ value: m.id, label: m.nome }))}
+            />
           </div>
         ) : (
           <div className="flex flex-col gap-2">

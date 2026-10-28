@@ -2,13 +2,7 @@
 
 import { useState } from "react";
 import { Line, LineChart, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { SelectBusca } from "@/components/ui/select-busca";
 import type { ExercicioResumo } from "@/lib/treino/types";
 import { buscarHistoricoCarga } from "./actions";
 
@@ -31,20 +25,13 @@ export function CargaExercicioChart({ exerciciosDisponiveis }: { exerciciosDispo
 
   return (
     <div className="flex flex-col gap-3">
-      <Select value={exercicioId} onValueChange={(v) => v && selecionar(v)}>
-        <SelectTrigger className="w-full">
-          <SelectValue placeholder="Escolha um exercício">
-            {(v: string) => exerciciosDisponiveis.find((e) => e.id === v)?.nome ?? "Escolha um exercício"}
-          </SelectValue>
-        </SelectTrigger>
-        <SelectContent>
-          {exerciciosDisponiveis.map((ex) => (
-            <SelectItem key={ex.id} value={ex.id}>
-              {ex.nome}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <SelectBusca
+        titulo="Escolher exercício"
+        placeholder="Escolha um exercício"
+        value={exercicioId}
+        onValueChange={(v) => v && selecionar(v)}
+        itens={exerciciosDisponiveis.map((ex) => ({ value: ex.id, label: ex.nome, detalhe: ex.grupo_muscular }))}
+      />
 
       {carregando ? <p className="text-sm text-muted-foreground">Carregando...</p> : null}
 

@@ -3,6 +3,7 @@
 import { useActionState, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { SelectBusca } from "@/components/ui/select-busca";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -87,20 +88,14 @@ export function IaForm({
           <input type="hidden" name="chave" value={chave} readOnly />
           <div className="flex flex-col gap-2">
             <Label htmlFor="modelo-select">Modelo</Label>
-            <Select name="modelo" value={modeloSelecionado} onValueChange={(v) => setModeloSelecionado(v ?? "")}>
-              <SelectTrigger id="modelo-select" className="w-full">
-                <SelectValue>
-                  {(v: string) => teste.modelos?.find((m) => m.id === v)?.nome ?? v}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent>
-                {teste.modelos.map((m) => (
-                  <SelectItem key={m.id} value={m.id}>
-                    {m.nome}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <SelectBusca
+              id="modelo-select"
+              name="modelo"
+              titulo="Escolher modelo"
+              value={modeloSelecionado}
+              onValueChange={setModeloSelecionado}
+              itens={teste.modelos.map((m) => ({ value: m.id, label: m.nome }))}
+            />
           </div>
           {salvar.erro ? <p className="text-sm text-destructive">{salvar.erro}</p> : null}
           {salvar.sucesso ? <p className="text-sm text-emerald-600">Salvo.</p> : null}

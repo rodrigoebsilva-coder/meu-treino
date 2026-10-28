@@ -173,6 +173,10 @@ async function aplicarImportacao(
       const treinoExercicioId = serie.treino_exercicio_id
         ? (mapaTreinoExercicio.get(serie.treino_exercicio_id) ?? null)
         : null;
+      const exercicioRealizadoId = serie.exercicio_realizado_id
+        ? (mapaExercicio.get(serie.exercicio_realizado_id) ?? (idsExercValidos.has(serie.exercicio_realizado_id) ? serie.exercicio_realizado_id : null))
+        : null;
+
       const { error: erroSerie } = await supabase.from("sessao_series").insert({
         user_id: userId,
         sessao_id: novaSessao.id,
@@ -183,6 +187,7 @@ async function aplicarImportacao(
         rpe: serie.rpe,
         concluida_em: serie.concluida_em,
         origem_offline: false,
+        exercicio_realizado_id: exercicioRealizadoId,
       });
       if (erroSerie) throw new Error("série de treino");
     }
@@ -222,6 +227,13 @@ async function aplicarImportacao(
         observacoes: anamnese.observacoes,
         meta_peso_kg: anamnese.meta_peso_kg,
         meta_prazo: anamnese.meta_prazo,
+        sexo: anamnese.sexo ?? null,
+        cintura_cm: anamnese.cintura_cm ?? null,
+        quadril_cm: anamnese.quadril_cm ?? null,
+        peito_cm: anamnese.peito_cm ?? null,
+        braco_cm: anamnese.braco_cm ?? null,
+        coxa_cm: anamnese.coxa_cm ?? null,
+        pescoco_cm: anamnese.pescoco_cm ?? null,
         criado_em: anamnese.criado_em,
       });
       if (erroAnamnese) throw new Error("anamnese");

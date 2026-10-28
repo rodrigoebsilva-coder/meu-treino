@@ -364,6 +364,11 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
     cards de treino colapsáveis
 13. ✅ Smart Swap: alternativas de exercício (aparelho ocupado) prontas desde a
     elaboração do plano, troca só vale pra sessão do dia
+14. ✅ Auditoria e blindagem: migration 0017 (proteção de atualizar_dica_casa e Vault),
+    idempotência com idLocal e upsert no sync offline, fallback de carga/reps na
+    execução, sincronização do schema de backup com migrations 15/16, cabeçalho seguro
+    x-goog-api-key na Gemini, validação de prefixo em fotos, fuso de Brasília no
+    Streak e catálogo de exercícios + check-in no contexto da IA
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 

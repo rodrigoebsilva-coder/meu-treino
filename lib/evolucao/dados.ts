@@ -1,5 +1,5 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { inicioDaSemana } from "@/lib/semana";
+import { inicioDaSemana, dataLocalString } from "@/lib/semana";
 
 export interface PontoPeso {
   data: string;
@@ -74,17 +74,20 @@ export async function calcularStreak(supabase: SupabaseClient): Promise<number> 
     .order("iniciada_em", { ascending: false })
     .limit(400);
 
-  const dias = new Set((data ?? []).map((s) => new Date(s.iniciada_em).toISOString().slice(0, 10)));
+  const dias = new Set((data ?? []).map((s) => dataLocalString(s.iniciada_em)));
 
   let streak = 0;
+  const hoje = new Date();
+  const dataHojeStr = dataLocalString(hoje);
+
   const cursor = new Date();
   // Se ainda não treinou hoje, o streak conta a partir de ontem (treinar hoje
   // mantém o streak, mas o dia de hoje não "quebra" ele antes de acabar).
-  if (!dias.has(cursor.toISOString().slice(0, 10))) {
+  if (!dias.has(dataHojeStr)) {
     cursor.setDate(cursor.getDate() - 1);
   }
 
-  while (dias.has(cursor.toISOString().slice(0, 10))) {
+  while (dias.has(dataLocalString(cursor))) {
     streak += 1;
     cursor.setDate(cursor.getDate() - 1);
   }
@@ -96,16 +99,29 @@ export async function buscarCargaExercicio(
   supabase: SupabaseClient,
   exercicioId: string
 ): Promise<{ data: string; carga: number }[]> {
-  const { data } = await supabase
-    .from("sessao_series")
-    .select("concluida_em, carga_real_kg, treino_exercicios!inner(exercicio_id)")
-    .eq("treino_exercicios.exercicio_id", exercicioId)
-    .not("carga_real_kg", "is", null)
-    .order("concluida_em", { ascending: true })
-    .limit(100);
+  // Busca séries onde o exercício planejado foi feito (sem troca) e séries onde foi feito via Smart Swap
+  const [{ data: planejadas }, { data: substitutas }] = await Promise.all([
+    supabase
+      .from("sessao_series")
+      .select("concluida_em, carga_real_kg, treino_exercicios!inner(exercicio_id)")
+      .eq("treino_exercicios.exercicio_id", exercicioId)
+      .is("exercicio_realizado_id", null)
+      .not("carga_real_kg", "is", null)
+      .order("concluida_em", { ascending: true })
+      .limit(100),
+    supabase
+      .from("sessao_series")
+      .select("concluida_em, carga_real_kg")
+      .eq("exercicio_realizado_id", exercicioId)
+      .not("carga_real_kg", "is", null)
+      .order("concluida_em", { ascending: true })
+      .limit(100),
+  ]);
 
-  return (data ?? []).map((s) => ({
-    data: s.concluida_em,
-    carga: Number(s.carga_real_kg),
-  }));
+  const combinadas = [
+    ...(planejadas ?? []).map((s) => ({ data: s.concluida_em, carga: Number(s.carga_real_kg) })),
+    ...(substitutas ?? []).map((s) => ({ data: s.concluida_em, carga: Number(s.carga_real_kg) })),
+  ].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+
+  return combinadas.slice(0, 100);
 }

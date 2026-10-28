@@ -154,14 +154,27 @@ export function ExecucaoClient({ treinoDiaId, treinoId }: { treinoDiaId: string;
     if (!sessaoIdLocal) return;
     const chave = chaveSerie(treinoExercicioId, numeroSerie);
     const v = valores[chave];
+    const sugestao = sugestoes[chave];
+    const ex = dia?.treino_exercicios.find((e) => e.id === treinoExercicioId);
+
+    const cargaRealKg =
+      v?.carga !== undefined && v.carga.trim() !== ""
+        ? Number(v.carga)
+        : (sugestao?.cargaRealKg ?? ex?.carga_sugerida_kg ?? null);
+
+    const repeticoesReal =
+      v?.reps !== undefined && v.reps.trim() !== ""
+        ? Number(v.reps)
+        : (sugestao?.repeticoesReal ?? ex?.repeticoes_min ?? null);
+
     const serie: SerieLocal = {
       idLocal: crypto.randomUUID(),
       sessaoIdLocal,
       treinoExercicioId,
       numeroSerie,
-      cargaRealKg: v?.carga ? Number(v.carga) : null,
-      repeticoesReal: v?.reps ? Number(v.reps) : null,
-      rpe: v?.rpe ? Number(v.rpe) : null,
+      cargaRealKg,
+      repeticoesReal,
+      rpe: v?.rpe && v.rpe.trim() !== "" ? Number(v.rpe) : null,
       concluidaEm: new Date().toISOString(),
       sincronizada: false,
       exercicioRealizadoId: substituicoes[treinoExercicioId] ?? null,

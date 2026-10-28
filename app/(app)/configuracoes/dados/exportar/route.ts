@@ -13,7 +13,7 @@ export async function GET() {
       supabase
         .from("anamneses")
         .select(
-          "versao, idade, altura_cm, peso_inicial_kg, nivel, lesoes, objetivo, dias_disponiveis, local_treino, observacoes, meta_peso_kg, meta_prazo, criado_em"
+          "versao, idade, altura_cm, peso_inicial_kg, nivel, lesoes, objetivo, dias_disponiveis, local_treino, observacoes, meta_peso_kg, meta_prazo, sexo, cintura_cm, quadril_cm, peito_cm, braco_cm, coxa_cm, pescoco_cm, criado_em"
         )
         .order("versao", { ascending: true }),
       supabase
@@ -28,7 +28,7 @@ export async function GET() {
       supabase
         .from("sessoes")
         .select(
-          "treino_dia_id, iniciada_em, finalizada_em, duracao_segundos, energia, sono, dor, notas, sessao_series(treino_exercicio_id, numero_serie, carga_real_kg, repeticoes_real, rpe, concluida_em)"
+          "treino_dia_id, iniciada_em, finalizada_em, duracao_segundos, energia, sono, dor, notas, sessao_series(treino_exercicio_id, numero_serie, carga_real_kg, repeticoes_real, rpe, concluida_em, exercicio_realizado_id)"
         ),
       supabase
         .from("medidas")

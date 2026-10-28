@@ -22,7 +22,7 @@ export async function montarContexto(supabase: SupabaseClient) {
   const { data: sessoesRecentes } = await supabase
     .from("sessoes")
     .select(
-      "iniciada_em, finalizada_em, duracao_segundos, sessao_series(numero_serie, carga_real_kg, repeticoes_real, rpe, treino_exercicio_id)"
+      "iniciada_em, finalizada_em, duracao_segundos, energia, sono, dor, notas, sessao_series(numero_serie, carga_real_kg, repeticoes_real, rpe, treino_exercicio_id, exercicio_realizado_id)"
     )
     .not("finalizada_em", "is", null)
     .order("iniciada_em", { ascending: false })
@@ -34,7 +34,13 @@ export async function montarContexto(supabase: SupabaseClient) {
     .order("registrado_em", { ascending: false })
     .limit(5);
 
-  return { anamnese, treinoAtivo, treinosAnteriores, sessoesRecentes, medidas };
+  const { data: catalogoExercicios } = await supabase
+    .from("exercicios")
+    .select("id, nome, grupo_muscular, equipamento")
+    .order("nome", { ascending: true })
+    .limit(250);
+
+  return { anamnese, treinoAtivo, treinosAnteriores, sessoesRecentes, medidas, catalogoExercicios: catalogoExercicios ?? [] };
 }
 
 export type Contexto = Awaited<ReturnType<typeof montarContexto>>;

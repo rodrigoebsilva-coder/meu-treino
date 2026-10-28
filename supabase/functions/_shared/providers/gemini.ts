@@ -13,11 +13,15 @@ export async function gerarComGemini(
   systemPrompt: string,
   userPrompt: string
 ): Promise<ResultadoProvider> {
+  const modeloSanitizado = encodeURIComponent(modelo.replace(/^models\//, "").trim());
   const res = await fetch(
-    `https://generativelanguage.googleapis.com/v1beta/models/${modelo}:generateContent?key=${apiKey}`,
+    `https://generativelanguage.googleapis.com/v1beta/models/${modeloSanitizado}:generateContent`,
     {
       method: "POST",
-      headers: { "content-type": "application/json" },
+      headers: {
+        "content-type": "application/json",
+        "x-goog-api-key": apiKey,
+      },
       body: JSON.stringify({
         systemInstruction: { parts: [{ text: systemPrompt }] },
         contents: [{ role: "user", parts: [{ text: userPrompt }] }],
@@ -41,7 +45,9 @@ export async function gerarComGemini(
 }
 
 export async function listarModelosGemini(apiKey: string): Promise<{ id: string; nome: string }[]> {
-  const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${apiKey}&pageSize=200`);
+  const res = await fetch("https://generativelanguage.googleapis.com/v1beta/models?pageSize=200", {
+    headers: { "x-goog-api-key": apiKey },
+  });
 
   if (!res.ok) {
     throw new Error(`Gemini API ${res.status}: ${await res.text()}`);

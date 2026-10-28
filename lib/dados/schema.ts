@@ -59,6 +59,7 @@ export const SessaoSerieExportSchema = z.object({
   repeticoes_real: z.number().int().nullable(),
   rpe: z.number().int().nullable(),
   concluida_em: z.string(),
+  exercicio_realizado_id: z.string().uuid().nullable().optional(),
 });
 
 export const SessaoExportSchema = z.object({
@@ -95,6 +96,13 @@ export const AnamneseExportSchema = z.object({
   observacoes: z.string().nullable(),
   meta_peso_kg: z.number().nullable(),
   meta_prazo: z.string().nullable(),
+  sexo: z.enum(["masculino", "feminino"]).nullable().optional(),
+  cintura_cm: z.number().nullable().optional(),
+  quadril_cm: z.number().nullable().optional(),
+  peito_cm: z.number().nullable().optional(),
+  braco_cm: z.number().nullable().optional(),
+  coxa_cm: z.number().nullable().optional(),
+  pescoco_cm: z.number().nullable().optional(),
   criado_em: z.string(),
 });
 

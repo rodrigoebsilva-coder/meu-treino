@@ -44,22 +44,29 @@ async function sincronizarUmaVez() {
     if (!idRemoto) {
       const { data, error } = await supabase
         .from("sessoes")
-        .insert({
-          treino_dia_id: sessao.treinoDiaId,
-          iniciada_em: sessao.iniciadaEm,
-          energia: sessao.energia,
-          sono: sessao.sono,
-          dor: sessao.dor,
-          notas: sessao.notas,
-        })
+        .upsert(
+          {
+            id: sessao.idLocal,
+            treino_dia_id: sessao.treinoDiaId,
+            iniciada_em: sessao.iniciadaEm,
+            finalizada_em: sessao.finalizadaEm,
+            duracao_segundos: sessao.duracaoSegundos,
+            energia: sessao.energia,
+            sono: sessao.sono,
+            dor: sessao.dor,
+            notas: sessao.notas,
+          },
+          { onConflict: "id" }
+        )
         .select("id")
         .single();
       if (error || !data) continue;
       idRemoto = data.id;
-      await db.sessoesLocais.update(sessao.idLocal, { idRemoto });
-    }
-
-    if (sessao.finalizadaEm && !sessao.sincronizada) {
+      await db.sessoesLocais.update(sessao.idLocal, {
+        idRemoto,
+        sincronizada: Boolean(sessao.finalizadaEm),
+      });
+    } else if (sessao.finalizadaEm && !sessao.sincronizada) {
       const { error } = await supabase
         .from("sessoes")
         .update({ finalizada_em: sessao.finalizadaEm, duracao_segundos: sessao.duracaoSegundos })
@@ -76,20 +83,39 @@ async function sincronizarUmaVez() {
       .toArray();
 
     for (const serie of series) {
-      const { error } = await supabase.from("sessao_series").insert({
-        sessao_id: idRemoto,
-        treino_exercicio_id: serie.treinoExercicioId,
-        numero_serie: serie.numeroSerie,
-        carga_real_kg: serie.cargaRealKg,
-        repeticoes_real: serie.repeticoesReal,
-        rpe: serie.rpe,
-        concluida_em: serie.concluidaEm,
-        origem_offline: true,
-        exercicio_realizado_id: serie.exercicioRealizadoId,
-      });
+      const { error } = await supabase.from("sessao_series").upsert(
+        {
+          id: serie.idLocal,
+          sessao_id: idRemoto,
+          treino_exercicio_id: serie.treinoExercicioId,
+          numero_serie: serie.numeroSerie,
+          carga_real_kg: serie.cargaRealKg,
+          repeticoes_real: serie.repeticoesReal,
+          rpe: serie.rpe,
+          concluida_em: serie.concluidaEm,
+          origem_offline: true,
+          exercicio_realizado_id: serie.exercicioRealizadoId,
+        },
+        { onConflict: "id" }
+      );
       if (!error) {
         await db.seriesLocais.update(serie.idLocal, { sincronizada: true });
       }
     }
+  }
+
+  // Limpeza preventiva: expurga sessões e séries sincronizadas há mais de 7 dias
+  try {
+    const seteDiasAtras = new Date(Date.now() - 7 * 86_400_000).toISOString();
+    const antigasSincronizadas = await db.sessoesLocais
+      .filter((s) => s.sincronizada && s.finalizadaEm !== null && s.finalizadaEm < seteDiasAtras)
+      .toArray();
+
+    for (const s of antigasSincronizadas) {
+      await db.seriesLocais.where("sessaoIdLocal").equals(s.idLocal).delete();
+      await db.sessoesLocais.delete(s.idLocal);
+    }
+  } catch {
+    // Falhas de expurgo não bloqueiam a sincronização
   }
 }

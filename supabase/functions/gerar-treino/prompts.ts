@@ -34,6 +34,7 @@ export function montarUserPrompt(
     `Ciclos anteriores (resumo): ${JSON.stringify(contexto.treinosAnteriores)}`,
     `Últimas sessões de execução registradas: ${JSON.stringify(contexto.sessoesRecentes)}`,
     `Evolução física recente (medidas): ${JSON.stringify(contexto.medidas)}`,
+    `Catálogo de exercícios cadastrados na base (priorize o exercicio_id correspondente em vez de criar novo): ${JSON.stringify(contexto.catalogoExercicios)}`,
   ];
 
   if (propostaAnterior) {

@@ -439,6 +439,10 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
 
 ## Regras de trabalho
 
+- **Versão do app**: `version` do `package.json` (aparece no rodapé como `vX.Y.Z`, via
+  `NEXT_PUBLIC_APP_VERSION` em `next.config.ts`). **Toda alteração pedida sobe a versão**
+  (patch p/ ajuste, minor p/ funcionalidade) e vai no commit, pra o usuário conferir que está
+  na versão certa. Atual: 0.17.1.
 - Fim de cada fase: lint + typecheck (+ testes quando existirem) + commit + resumo
   do que foi feito e como testar.
 - Nunca commitar `.env.local` nem qualquer chave. `.env.example` é o único template

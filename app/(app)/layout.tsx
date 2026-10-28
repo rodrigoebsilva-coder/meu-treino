@@ -22,6 +22,7 @@ export default async function AppLayout({ children }: { children: React.ReactNod
         <footer className="flex flex-col items-center gap-1 p-6 pt-0 text-xs text-muted-foreground print:hidden">
           <span>Criado por</span>
           <SoliaLogo className="text-foreground" />
+          <span>v{process.env.NEXT_PUBLIC_APP_VERSION}</span>
         </footer>
       </div>
       <BottomNav />

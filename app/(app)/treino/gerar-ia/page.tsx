@@ -8,10 +8,12 @@ import { GerarPageClient } from "./gerar-page-client";
 export default async function GerarIaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tipoAcao?: string }>;
+  searchParams: Promise<{ tipoAcao?: string; semanas?: string }>;
 }) {
   const params = await searchParams;
   const tipoAcaoInicial = params.tipoAcao === "novo_ciclo" ? ("novo_ciclo" as TipoAcao) : undefined;
+  const semanas = Number(params.semanas);
+  const semanasInicial = semanas >= 1 && semanas <= 52 ? semanas : undefined;
   const supabase = await createClient();
 
   const { data: config } = await supabase
@@ -46,6 +48,7 @@ export default async function GerarIaPage({
         temTreinoAtivo={!!treinoAtivo}
         exerciciosPorId={exerciciosPorId}
         tipoAcaoInicial={tipoAcaoInicial}
+        semanasInicial={semanasInicial}
       />
     </main>
   );

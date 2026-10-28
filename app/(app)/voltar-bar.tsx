@@ -9,7 +9,7 @@ export function VoltarBar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  if (pathname === "/") return null;
+  if (pathname === "/" || pathname.startsWith("/primeiro-acesso")) return null;
 
   function voltar() {
     if (window.history.length > 1) {

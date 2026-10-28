@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { redirect } from "next/navigation";
 import { Flame, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -30,6 +31,8 @@ export default async function HomePage() {
     .select("objetivo, dias_disponiveis")
     .maybeSingle();
 
+  if (!anamnese) redirect("/primeiro-acesso");
+
   const treinoAtivo = await buscarTreinoAtivo(supabase);
   const [proximosDias, resumoSemana, streak] = await Promise.all([
     treinoAtivo ? buscarProximosDias(supabase, treinoAtivo.dias, 5) : Promise.resolve([]),
@@ -46,18 +49,9 @@ export default async function HomePage() {
 
       <h1 className="font-heading text-2xl font-semibold">{saudacao(new Date().getHours())} 👋</h1>
 
-      {anamnese ? (
-        <p className="text-muted-foreground">
-          Objetivo atual: {anamnese.objetivo} · {anamnese.dias_disponiveis}x por semana.
-        </p>
-      ) : (
-        <Card>
-          <CardContent className="flex flex-col gap-3 py-4">
-            <p className="text-muted-foreground">Você ainda não preencheu seu perfil/anamnese.</p>
-            <Button render={<Link href="/perfil">Preencher perfil</Link>} nativeButton={false} className="w-fit" />
-          </CardContent>
-        </Card>
-      )}
+      <p className="text-muted-foreground">
+        Objetivo atual: {anamnese.objetivo} · {anamnese.dias_disponiveis}x por semana.
+      </p>
 
       {treinoAtivo && proximoDia ? (
         <Card>

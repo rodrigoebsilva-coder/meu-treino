@@ -29,6 +29,7 @@ export function GerarForm({
   temTreinoAtivo,
   exerciciosPorId,
   tipoAcaoInicial,
+  semanasInicial,
   onDescartar,
 }: {
   provedorPadrao: ProvedorIA;
@@ -36,10 +37,11 @@ export function GerarForm({
   temTreinoAtivo: boolean;
   exerciciosPorId: Record<string, string>;
   tipoAcaoInicial?: TipoAcao;
+  semanasInicial?: number;
   onDescartar: () => void;
 }) {
   const [tipoAcao, setTipoAcao] = useState<TipoAcao>(tipoAcaoInicial ?? (temTreinoAtivo ? "ajustar" : "novo_ciclo"));
-  const [duracaoSemanas, setDuracaoSemanas] = useState(12);
+  const [duracaoSemanas, setDuracaoSemanas] = useState(semanasInicial ?? 12);
   const [provedor, setProvedor] = useState<ProvedorIA>(provedorPadrao);
   const [modelo, setModelo] = useState(modeloPadrao);
   const [modelos, setModelos] = useState<ModeloDisponivel[] | null>(null);

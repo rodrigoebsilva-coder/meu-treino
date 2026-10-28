@@ -15,6 +15,7 @@ const ITENS = [
 
 export function BottomNav() {
   const pathname = usePathname();
+  if (pathname.startsWith("/primeiro-acesso")) return null;
 
   return (
     <nav className="sticky bottom-0 z-10 mx-auto flex w-full max-w-2xl border-t bg-background pb-[env(safe-area-inset-bottom)] print:hidden">

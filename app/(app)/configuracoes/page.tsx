@@ -2,7 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { TimerToggles } from "./timer-toggles";
-import { sair } from "../actions";
+import { SairButton } from "./sair-button";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function ConfiguracoesPage() {
@@ -30,11 +30,7 @@ export default async function ConfiguracoesPage() {
         <Button variant="outline" render={<Link href="/configuracoes/usuarios">Usuários 🛠️</Link>} nativeButton={false} className="w-fit" />
       ) : null}
 
-      <form action={sair}>
-        <Button type="submit" variant="outline">
-          Sair
-        </Button>
-      </form>
+      <SairButton />
     </main>
   );
 }

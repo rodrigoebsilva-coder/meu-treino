@@ -368,7 +368,8 @@ usuário). Mesmo padrão: uma fase de cada vez, com aprovação antes da próxim
     idempotência com idLocal e upsert no sync offline, fallback de carga/reps na
     execução, sincronização do schema de backup com migrations 15/16, cabeçalho seguro
     x-goog-api-key na Gemini, validação de prefixo em fotos, fuso de Brasília no
-    Streak e catálogo de exercícios + check-in no contexto da IA
+    Streak e catálogo de exercícios + check-in no contexto da IA (ver detalhes e
+    próximos passos em [HANDOFF-FASE-14.md](HANDOFF-FASE-14.md))
 
 ## Pendências conhecidas (não bloqueiam a fase atual)
 
